@@ -12,8 +12,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   // TEMPORARY HARDCODED CREDENTIALS FOR TESTING
-  const TEMP_EMAIL = "js@schaak.mt"
-  const TEMP_PASSWORD = "admin26"
+  const TEMP_EMAIL = "admin@test.com"
+  const TEMP_PASSWORD = "Admin123!"
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
