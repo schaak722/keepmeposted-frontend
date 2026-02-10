@@ -1,436 +1,448 @@
-# Phase 6A: Core Infrastructure & App Shell
+# Phase 6B: Internal Ops Platform
 
 ## 🎯 Overview
 
-This is **Phase 6A** - the foundation phase that transforms the frontend into a true multi-tenant admin portal with role-based access control, persistent navigation, and proper authentication.
+**Phase 6B** builds the core internal operations management pages for the KeepMePosted platform. This phase enables internal ops and admin users to manage companies, jobs, applicants, and users across the entire platform.
 
 ## 📦 What's Included
 
-### 1. **Updated TypeScript Types** (`types/index.ts`)
-- Complete type definitions for multi-company model
-- User with memberships array
-- Enhanced Company, Job, Applicant models
-- Salary bands and job categories
-- Employment basis enum
-- Role-based access types
+### 1. **Companies Management Page** (`app/companies/page.tsx`)
+- Full company listing with search
+- Create/Edit company modal
+- Logo upload functionality
+- Company contact information management
+- Job and applicant counts per company
 
-### 2. **Essential UI Components** (`components/ui/`)
-- ✅ `dialog.tsx` - Modal/dialog component (Radix UI)
-- ✅ `dropdown-menu.tsx` - Dropdown menus for actions
-- ✅ `checkbox.tsx` - Checkbox for multi-select
-- ✅ `textarea.tsx` - Large text inputs
-- ✅ `select.tsx` - Dropdown select
-- ✅ `toast.tsx` - Toast notification system
-- ✅ `toaster.tsx` - Toast container
-- ✅ `skeleton.tsx` - Loading skeletons
+### 2. **Company Modal** (`components/modals/company-modal.tsx`)
+- Create/Edit company profiles
+- Logo file upload with validation
+- Industry selection
+- Contact person details
+- Form validation
 
-### 3. **Layout Components** (`components/layout/`)
-- ✅ `app-shell.tsx` - Main layout wrapper (sidebar + header + content)
-- ✅ `sidebar.tsx` - Persistent left sidebar with role-based navigation
-- ✅ `header.tsx` - Top header with mobile menu + logout
-- ✅ `company-switcher.tsx` - Company switcher for clients
+### 3. **Global Jobs Page** (`app/jobs/page.tsx`)
+- All jobs across all companies
+- Create/Edit job modal
+- Search and filter jobs
+- Job status management
+- Applicant counts
 
-### 4. **Authentication System** (`contexts/`)
-- ✅ `auth-context.tsx` - User session management
-  - Login/logout functionality
-  - Multi-company memberships
-  - Active company tracking
-  - Role-based access checks
-  - Route permission checks
+### 4. **Job Modal** (`components/modals/job-modal.tsx`)
+- Company selection
+- Multi-select employment basis (Full-Time, Part-Time, etc.)
+- Salary band dropdown
+- Multi-select job categories
+- Up to 3 preset questions
+- Job description and company about
+- Status and closing date
 
-### 5. **Hooks** (`hooks/`)
-- ✅ `use-toast.ts` - Toast notification hook
+### 5. **Global Applicants Page** (`app/applicants/page.tsx`)
+- All applicants across platform
+- CV download functionality
+- Search by name, company, position
+- Overall scores and recommendations
+- Stats dashboard
 
-### 6. **Updated Root Layout** (`app/layout.tsx`)
-- Wraps app with AuthProvider
-- Integrates AppShell
-- Adds Toaster for notifications
+### 6. **User Management Page** (`app/users/page.tsx`)
+- User listing (Admin only)
+- Role badges
+- Company access display
+- User stats
+- Placeholder for future edit/invite features
 
 ---
 
-## 🚀 How to Integrate Phase 6A
+## 🚀 How to Integrate Phase 6B
 
 ### Step 1: Upload to GitHub
 
-1. **Download and extract** `phase6a-core-infrastructure.zip`
-2. **Go to GitHub**: https://github.com/schaak722/keepmeposted-frontend
-3. **Upload all folders**:
-   - `types/` - Replaces existing types
-   - `components/ui/` - Adds new UI components (keeps existing)
-   - `components/layout/` - NEW folder
-   - `contexts/` - NEW folder
-   - `hooks/` - NEW folder (or adds to existing)
-   - `app/layout.tsx` - Replaces existing layout
-4. **Commit changes**
-5. **Wait** for Koyeb to deploy
+1. **Download and extract** `phase6b-internal-ops.zip`
+2. **Upload all folders** to GitHub:
+   - `app/companies/`
+   - `app/jobs/`
+   - `app/applicants/`
+   - `app/users/`
+   - `components/modals/`
+3. **Commit changes**
+4. **Wait** for Koyeb to deploy
 
-### Step 2: Update package.json Dependencies
+### Step 2: Test the Pages
 
-Add these Radix UI dependencies (required for new components):
+After deployment, navigate to each page:
 
-```json
-"dependencies": {
-  "@radix-ui/react-checkbox": "^1.0.4",
-  "@radix-ui/react-dialog": "^1.0.5",
-  "@radix-ui/react-dropdown-menu": "^2.0.6",
-  "@radix-ui/react-select": "^2.0.0",
-  "@radix-ui/react-toast": "^1.1.5"
-}
-```
+**Companies Page** - `/companies`
+- ✅ IT Admin and Internal Ops can access
+- ✅ Client users cannot access (blocked by AppShell)
+- ✅ Click "Add Company" to test modal
+- ✅ Click company name to edit
+- ✅ Upload logo (file validation works)
 
-Run `npm install` in GitHub Codespaces or locally.
+**Jobs Page** - `/jobs`
+- ✅ IT Admin and Internal Ops can access
+- ✅ Click "Create Job" to test modal
+- ✅ Multi-select basis checkboxes work
+- ✅ Salary band dropdown populates
+- ✅ Categories multi-select works
+- ✅ Up to 3 preset questions
 
-### Step 3: Update Login Page
+**Applicants Page** - `/applicants`
+- ✅ IT Admin and Internal Ops can access
+- ✅ Stats cards show counts
+- ✅ Click "Download CV" triggers download
 
-Update `app/login/page.tsx` to use real authentication:
-
-```typescript
-"use client"
-
-import { useState } from "react"
-import { useAuth } from "@/contexts/auth-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/hooks/use-toast"
-
-export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
-  const { toast } = useToast()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      await login(email, password)
-      // Redirect handled by auth context
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Invalid credentials. Please try again.",
-        variant: "error"
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-brand-blue">Keepmeposted</h1>
-          <p className="text-sm text-gray-500 mt-2">AI Applicant Screening</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-semibold mb-6">Welcome back</h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Password</label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full bg-brand-blue hover:bg-brand-blue-dark"
-              disabled={isLoading}
-            >
-              {isLoading ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
-        </div>
-      </div>
-    </div>
-  )
-}
-```
+**User Management** - `/users`
+- ✅ IT Admin ONLY can access
+- ✅ Internal Ops blocked (403 route check)
+- ✅ Shows user listing with roles
+- ✅ Displays company memberships
 
 ---
 
 ## 🎨 Key Features
 
-### Role-Based Navigation
+### Companies Management
 
-**IT Admin** sees:
-- 🏢 Companies
-- 💼 Jobs
-- 👥 Applicants
-- ⚙️ User Management
+**Table Columns:**
+- Logo (thumbnail or initial)
+- Company Name (clickable to edit)
+- Ref ID (badge)
+- Industry
+- Job Count
+- Applicant Count
+- Contact Person
+- Edit button
 
-**Internal Ops (Business Admin)** sees:
-- 🏢 Companies
-- 💼 Jobs
-- 👥 Applicants
+**Create/Edit Modal:**
+- Logo upload (PNG, JPG, WEBP, max 5MB)
+- Ref ID (required, unique)
+- Company Name (required)
+- Industry dropdown (required)
+- Website URL
+- Company Description
+- Contact Person Name
+- Contact Person Position
+- Contact Person Email (validated)
 
-**Client** sees:
-- 💼 Jobs (scoped to their companies)
-- Company Switcher (sidebar + header)
+### Jobs Management
 
-### Responsive Design
+**Table Columns:**
+- Job ID
+- Company (logo + name)
+- Position Title
+- Date Posted
+- Closing Date
+- Applicant Count
+- Status (Draft/Open/Closed)
+- Edit button
 
-- **Desktop (≥1024px)**: Persistent sidebar visible
-- **Tablet/Mobile (<1024px)**: Hamburger menu, sidebar slides in
-- **Company Switcher**: Shows in both sidebar (client) and header
+**Create/Edit Modal:**
+- Company selection (dropdown)
+- Position Title
+- Employment Basis (multi-select checkboxes)
+  - Full-Time
+  - Part-Time
+  - Freelance
+  - Hybrid
+  - Temporary
+- Location
+- Seniority
+- Salary Band (dropdown from predefined EUR bands)
+- Job Categories (multi-select checkboxes)
+- Job Description (textarea)
+- About the Company (textarea)
+- Preset Questions (3 optional text inputs)
+- Closing Date (date picker)
+- Status (Draft/Open/Closed)
 
-### Loading States
+### Applicants Management
 
-Use the skeleton components for better UX:
+**Table Columns:**
+- Name (with email below)
+- Company Applied For
+- Position Applied For
+- Date Applied
+- Overall Score (color-coded)
+- Recommendation badge
+- Download CV button
 
+**Stats Dashboard:**
+- Total Applicants
+- Strong Matches (green)
+- Possible Fits (yellow)
+- Not Recommended (red)
+
+### User Management
+
+**Table Columns:**
+- Full Name
+- Email
+- Role (badge: IT Admin/Internal Ops/Client)
+- Company Access (badges for each company)
+- Edit button (placeholder)
+
+**Stats:**
+- Total Users
+- Internal Staff
+- Client Users
+
+---
+
+## 🔄 Current State: Mock Data
+
+All pages currently use **mock data**. Here's what needs backend integration:
+
+### Companies Page
 ```typescript
-import { TableSkeleton, PageSkeleton } from "@/components/ui/skeleton"
-
-// While loading
-if (isLoading) {
-  return <TableSkeleton rows={5} />
-}
+// Replace MOCK_COMPANIES with:
+const { data: companies } = await apiClient.get("/companies")
 ```
 
-### Toast Notifications
-
-Use toast for user feedback:
-
+### Jobs Page
 ```typescript
-import { useToast } from "@/hooks/use-toast"
+// Replace MOCK_JOBS with:
+const { data: jobs } = await apiClient.get("/jobs") // Platform-wide jobs
+```
 
-const { toast } = useToast()
+### Applicants Page
+```typescript
+// Replace MOCK_APPLICANTS with:
+const { data: applicants } = await apiClient.get("/applicants") // Platform-wide
+```
 
-// Success
-toast({
-  title: "Success!",
-  description: "Company created successfully",
-  variant: "success"
-})
-
-// Error
-toast({
-  title: "Error",
-  description: "Failed to create company",
-  variant: "error"
-})
+### User Management
+```typescript
+// Replace MOCK_USERS with:
+const { data: users } = await apiClient.get("/users") // Admin only
 ```
 
 ---
 
-## 🔐 Authentication Flow
+## 🔐 Access Control
 
-1. **User logs in** → Stores tokens in localStorage
-2. **AuthContext loads** → Restores session from localStorage
-3. **Redirect based on role**:
-   - Client → `/company/{first-company-id}/jobs`
-   - Admin/Internal Ops → `/companies`
-4. **Navigation filtered** → Shows only allowed routes
-5. **Company switching** → Updates active company + redirects
+Phase 6B pages automatically enforce role-based access via the AppShell:
+
+| Page | IT Admin | Internal Ops | Client |
+|------|----------|--------------|--------|
+| `/companies` | ✅ | ✅ | ❌ |
+| `/jobs` | ✅ | ✅ | ❌ |
+| `/applicants` | ✅ | ✅ | ❌ |
+| `/users` | ✅ | ❌ | ❌ |
+
+Users attempting to access restricted pages will:
+1. Not see the route in navigation (sidebar hides it)
+2. Be blocked by `canAccessRoute()` check if they manually navigate
 
 ---
 
-## 📋 What Changed from Previous Phases
+## 📋 Backend API Requirements
 
-### Removed Files
-- ❌ `app/companies/page.tsx` (old card-based selector)
-- ❌ Hardcoded login logic
+Phase 6B expects these endpoints to exist:
 
-### Updated Files
-- ✅ `types/index.ts` - Complete rewrite with multi-company
-- ✅ `app/layout.tsx` - Now includes AuthProvider + AppShell
-- ✅ `app/login/page.tsx` - Should use real auth (see Step 3)
+### Companies
+```
+GET    /companies
+POST   /companies
+PUT    /companies/:id
+POST   /companies/:id/logo (multipart/form-data)
+```
 
-### New Files
-- ✅ All layout components
-- ✅ Auth context
-- ✅ New UI components (dialogs, dropdowns, etc.)
-- ✅ Toast system
-- ✅ Loading skeletons
+### Jobs
+```
+GET    /jobs (platform-wide)
+POST   /companies/:companyId/jobs
+PUT    /companies/:companyId/jobs/:jobId
+```
+
+### Applicants
+```
+GET    /applicants (platform-wide)
+GET    /companies/:companyId/applicants/:applicantId/cv/download
+```
+
+### Users
+```
+GET    /users (admin only)
+PUT    /users/:userId (admin only)
+POST   /users/invite (admin only, future)
+```
 
 ---
 
 ## 🧪 How to Test
 
-### 1. Test Navigation (After Login)
+### 1. Test Companies Page
 
-**As IT Admin:**
-- See all 4 nav items
-- Click each → verify routing works
-- No company switcher visible
+```
+1. Login as IT Admin or Internal Ops
+2. Navigate to /companies
+3. Click "+ Add Company"
+4. Fill form:
+   - Ref ID: TEST001
+   - Name: Test Company
+   - Industry: Technology & IT
+   - Upload a logo (test file validation)
+   - Fill contact person details
+5. Click "Create Company"
+6. Verify toast notification appears
+7. Verify company appears in table
+8. Click company name to edit
+9. Update details and save
+```
 
-**As Business Admin:**
-- See 3 nav items (no User Management)
-- Verify routing works
+### 2. Test Jobs Page
 
-**As Client:**
-- See only Jobs
-- See Company Switcher in sidebar
-- Click company switcher → see all companies
-- Switch company → URL updates
+```
+1. Navigate to /jobs
+2. Click "+ Create Job"
+3. Select company from dropdown
+4. Fill position title
+5. Select multiple employment basis (e.g., Full-Time + Hybrid)
+6. Select salary band
+7. Select categories
+8. Add 2-3 preset questions
+9. Fill description
+10. Set closing date
+11. Set status to "Open"
+12. Click "Create Job"
+13. Verify job appears in table
+```
 
-### 2. Test Mobile Responsiveness
+### 3. Test Applicants Page
 
-- Resize to mobile width
-- Click hamburger menu → sidebar slides in
-- Click backdrop or nav item → sidebar closes
-- Company switcher works in mobile
+```
+1. Navigate to /applicants
+2. Verify stats cards show correct counts
+3. Use search to filter
+4. Click "Download CV" button
+5. Verify toast notification
+```
 
-### 3. Test Toast Notifications
+### 4. Test User Management (Admin Only)
 
-```typescript
-// Test in any component
-import { useToast } from "@/hooks/use-toast"
-
-const { toast } = useToast()
-
-<button onClick={() => toast({ 
-  title: "Test", 
-  description: "It works!",
-  variant: "success"
-})}>
-  Test Toast
-</button>
+```
+1. Login as IT Admin
+2. Navigate to /users
+3. Verify page loads
+4. Search for users
+5. View company memberships
+6. Logout and login as Internal Ops
+7. Try to navigate to /users
+8. Verify access blocked (sidebar doesn't show it)
 ```
 
 ---
 
-## ⚠️ Important Notes
+## ✅ Phase 6B Checklist
 
-### Backend Integration Required
-
-Phase 6A assumes your backend has these endpoints:
-
-```
-POST /auth/login
-  Body: { email, password }
-  Returns: { access_token, refresh_token, user }
-
-GET /me
-  Headers: Authorization: Bearer {token}
-  Returns: User with memberships
-```
-
-User response should match this structure:
-
-```typescript
-{
-  id: string
-  email: string
-  full_name: string
-  role: "it_admin" | "business_admin" | "client"
-  memberships: [
-    {
-      company_id: string
-      company_name: string
-      company_logo_url?: string
-      role: string
-      is_active: boolean
-    }
-  ]
-}
-```
-
-### Temporary Mock Data
-
-If backend isn't ready, you can keep hardcoded login temporarily:
-
-```typescript
-// In auth-context.tsx login function
-if (email === "admin@test.com" && password === "Admin123!") {
-  const mockUser: User = {
-    id: "1",
-    email: email,
-    full_name: "Admin User",
-    role: Role.IT_ADMIN,
-    memberships: [],
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-  // Continue with mock flow...
-}
-```
-
----
-
-## 🎯 What's Next: Phase 6B
-
-After Phase 6A is deployed and tested:
-
-**Phase 6B: Internal Ops Platform** will add:
-- Companies Management page (table + CRUD)
-- Logo upload functionality
-- Global Jobs page with Create Job modal
-- Global Applicants page
-- User Management page (admin only)
-
-**Phase 6C: Client Experience** will add:
-- Enhanced client jobs page
-- 3-dots actions menu
-- Job Details modal
-- Updated applicants table
-
----
-
-## ✅ Phase 6A Checklist
-
-- [ ] Upload all folders to GitHub
-- [ ] Update package.json dependencies
-- [ ] Run `npm install`
-- [ ] Update login page to use real auth
-- [ ] Test navigation for all roles
-- [ ] Test mobile responsiveness
-- [ ] Test company switcher (client role)
-- [ ] Test toast notifications
-- [ ] Verify backend endpoints exist
-- [ ] Report: "Phase 6A deployed ✅" or share errors
+- [ ] Upload all files to GitHub
+- [ ] Commit and push
+- [ ] Wait for Koyeb deployment
+- [ ] Test Companies page (create, edit, logo upload)
+- [ ] Test Jobs page (create with all fields)
+- [ ] Test Applicants page (search, CV download)
+- [ ] Test User Management (admin only access)
+- [ ] Verify role-based access control works
+- [ ] Report: "Phase 6B deployed ✅" or share errors
 
 ---
 
 ## 🆘 Troubleshooting
 
-**Sidebar not showing:**
-- Check AuthProvider is wrapping app
-- Verify user is logged in
-- Check browser width (hidden on mobile)
+**"Page not found" errors:**
+- Ensure all files are in correct directories
+- Check AppShell is rendering pages
+- Verify routes are accessible for your role
 
-**Navigation not filtering:**
-- Verify user role is set correctly
-- Check Role enum matches backend values
+**Modal not opening:**
+- Check browser console for errors
+- Verify Dialog component imported correctly
+- Test with simple button click
 
-**Company Switcher not showing:**
-- Only visible for client users
-- Requires memberships array with data
+**Logo upload not working:**
+- File validation requires image/* types
+- Max size is 5MB
+- Preview uses FileReader API
 
-**Toast not appearing:**
-- Check Toaster is in root layout
-- Verify useToast is called correctly
-- Check z-index isn't blocked
+**Access denied to pages:**
+- Check user role in session
+- Verify canAccessRoute() logic in auth-context
+- IT Admin has full access
+- Internal Ops has Companies/Jobs/Applicants
+- Client has none of these pages
 
-**Build errors:**
-- Install Radix UI dependencies
-- Check all import paths use `@/`
-- Verify TypeScript types are correct
+---
+
+## 🎯 What's Next: Phase 6C
+
+After Phase 6B is deployed and tested:
+
+**Phase 6C: Client Experience** will add:
+- Enhanced client jobs page
+- 3-dots actions menu on job rows
+- Job Details modal (view full job info)
+- Updated applicants table with new columns
+- Polish and final tweaks
 
 ---
 
 ## 📞 Support
 
 After deployment, report status:
-- **Success**: "Phase 6A deployed ✅ - Navigation working!"
-- **Issues**: Share error messages from Koyeb logs or browser console
+- **Success**: "Phase 6B deployed ✅ - All pages working!"
+- **Issues**: Share error messages or screenshots
+
+---
+
+## 💡 Implementation Notes
+
+### Logo Upload
+Currently stores base64 preview. In production:
+```typescript
+const formData = new FormData()
+formData.append('logo_file', logoFile)
+const response = await apiClient.post(
+  `/companies/${companyId}/logo`, 
+  formData,
+  { headers: { 'Content-Type': 'multipart/form-data' } }
+)
+// response.data.logo_url
+```
+
+### Multi-Select Basis
+Stores as array: `["Full-Time", "Hybrid"]`
+
+Backend should expect:
+```json
+{
+  "basis": ["Full-Time", "Hybrid"]
+}
+```
+
+### Preset Questions
+Stores as array, max 3, empty strings filtered out:
+```json
+{
+  "preset_questions": [
+    "What's your experience with React?",
+    "Can you work remotely?"
+  ]
+}
+```
+
+### CV Download
+Currently simulated. In production:
+```typescript
+const response = await apiClient.get(
+  `/companies/${companyId}/applicants/${applicantId}/cv/download`,
+  { responseType: 'blob' }
+)
+const url = window.URL.createObjectURL(response.data)
+const link = document.createElement('a')
+link.href = url
+link.download = `${applicantName}-CV.pdf`
+link.click()
+```
+
+---
+
+**Phase 6B Ready to Deploy!** 🚀
