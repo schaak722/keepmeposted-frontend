@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       // Call real API
-      const response = await apiClient.post("/auth/login", { email, password })
+      const response = await apiClient.post("/auth/login", { email, password }) as any
       const { access_token, refresh_token, user } = response.data
 
       // Store in localStorage
