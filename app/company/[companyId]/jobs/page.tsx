@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Header } from "@/components/layout/header"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -95,7 +94,6 @@ export default function JobsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       <div className="container mx-auto py-8 px-4">
         {/* Page Header */}
         <div className="mb-6">
