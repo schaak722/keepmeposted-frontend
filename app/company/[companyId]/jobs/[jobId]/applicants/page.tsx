@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { TableSkeleton } from "@/components/ui/skeleton"
@@ -174,11 +175,61 @@ export default function ClientApplicantsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null)
-
-  const filteredApplicants = applicants.filter(applicant => 
-    applicant.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    applicant.last_name.toLowerCase().includes(searchQuery.toLowerCase())
+  const [activeFilter, setActiveFilter] = useState<"ALL" | Recommendation | "STARRED">("ALL")
+  const [sort, setSort] = useState<{ key: "name" | "overall" | "preq" | "recommendation"; dir: "asc" | "desc" }>(
+    { key: "overall", dir: "desc" }
   )
+
+  const visibleApplicants = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+
+    let list = applicants
+
+    // Search
+    if (q) {
+      list = list.filter((a) =>
+        `${a.first_name} ${a.last_name}`.toLowerCase().includes(q)
+      )
+    }
+
+    // Filter
+    if (activeFilter === "STARRED") {
+      list = list.filter((a) => a.is_starred)
+    } else if (activeFilter !== "ALL") {
+      list = list.filter((a) => a.final_recommendation === activeFilter)
+    }
+
+    // Sort
+    const dir = sort.dir === "asc" ? 1 : -1
+    const recommendationRank: Record<Recommendation, number> = {
+      "Strong Match": 3,
+      "Possible Fit": 2,
+      "Not Recommended": 1,
+    }
+
+    return [...list].sort((a, b) => {
+      if (sort.key === "name") {
+        const an = `${a.last_name} ${a.first_name}`.toLowerCase()
+        const bn = `${b.last_name} ${b.first_name}`.toLowerCase()
+        return an.localeCompare(bn) * dir
+      }
+      if (sort.key === "overall") return (a.overall_match_score - b.overall_match_score) * dir
+      if (sort.key === "preq") return (a.preset_questions_score - b.preset_questions_score) * dir
+      return (recommendationRank[a.final_recommendation] - recommendationRank[b.final_recommendation]) * dir
+    })
+  }, [applicants, searchQuery, activeFilter, sort])
+
+  const toggleSort = (key: "name" | "overall" | "preq" | "recommendation") => {
+    setSort((prev) => {
+      if (prev.key !== key) return { key, dir: "asc" }
+      return { key, dir: prev.dir === "asc" ? "desc" : "asc" }
+    })
+  }
+
+  const sortIndicator = (key: "name" | "overall" | "preq" | "recommendation") => {
+    if (sort.key !== key) return null
+    return <span className="ml-1 text-xs text-gray-500">{sort.dir === "asc" ? "▲" : "▼"}</span>
+  }
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return "text-green-600 font-semibold"
@@ -205,13 +256,60 @@ export default function ClientApplicantsPage() {
         </div>
 
         {/* Controls */}
-        <div className="flex justify-between items-center mb-6 gap-4">
+        <div className="flex flex-col gap-3 mb-6">
+          <div className="flex justify-between items-center gap-4">
           <Input
             placeholder="Search applicants..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
           />
+          </div>
+
+          {/* Show filter (matches Figma intent; table columns remain per v1.2) */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="text-sm text-gray-600 mr-1">Show:</div>
+            <Button
+              type="button"
+              size="sm"
+              variant={activeFilter === "ALL" ? "default" : "outline"}
+              onClick={() => setActiveFilter("ALL")}
+            >
+              All
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={activeFilter === "Strong Match" ? "default" : "outline"}
+              onClick={() => setActiveFilter("Strong Match")}
+            >
+              Strong Match
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={activeFilter === "Possible Fit" ? "default" : "outline"}
+              onClick={() => setActiveFilter("Possible Fit")}
+            >
+              Possible Fit
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={activeFilter === "Not Recommended" ? "default" : "outline"}
+              onClick={() => setActiveFilter("Not Recommended")}
+            >
+              Not Recommended
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={activeFilter === "STARRED" ? "default" : "outline"}
+              onClick={() => setActiveFilter("STARRED")}
+            >
+              Starred
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -248,22 +346,43 @@ export default function ClientApplicantsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Applicant Name</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("name")}
+                    title="Sort by applicant name">
+                    Applicant Name{sortIndicator("name")}
+                  </TableHead>
                   <TableHead>Location</TableHead>
-                  <TableHead className="text-center">Overall Score</TableHead>
-                  <TableHead className="text-center">PreQ Score</TableHead>
-                  <TableHead>Recommendation</TableHead>
+                  <TableHead
+                    className="text-center cursor-pointer select-none"
+                    onClick={() => toggleSort("overall")}
+                    title="Sort by overall score"
+                  >
+                    Overall Score{sortIndicator("overall")}
+                  </TableHead>
+                  <TableHead
+                    className="text-center cursor-pointer select-none"
+                    onClick={() => toggleSort("preq")}
+                    title="Sort by PreQ score"
+                  >
+                    PreQ Score{sortIndicator("preq")}
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none"
+                    onClick={() => toggleSort("recommendation")}
+                    title="Sort by recommendation"
+                  >
+                    Recommendation{sortIndicator("recommendation")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredApplicants.length === 0 ? (
+                {visibleApplicants.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                       {searchQuery ? "No applicants found matching your search" : "No applicants yet"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredApplicants.map(applicant => (
+                  visibleApplicants.map(applicant => (
                     <TableRow 
                       key={applicant.id}
                       onClick={() => setSelectedApplicant(applicant)}
