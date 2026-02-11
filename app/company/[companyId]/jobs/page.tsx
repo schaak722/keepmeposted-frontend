@@ -1,310 +1,181 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import Link from "next/link"
 import { useParams } from "next/navigation"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { TableSkeleton } from "@/components/ui/skeleton"
-import { ApplicantDetailsPanel } from "@/components/applicant-details/applicant-details-panel"
-import type { Applicant, Recommendation } from "@/types"
+import { format } from "date-fns"
 
-// Mock data - enhanced from Phase 5
-const MOCK_APPLICANTS: Applicant[] = [
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { TableSkeleton } from "@/components/ui/skeleton"
+
+import type { Job, JobStatus } from "@/types"
+
+// Mock data (client view: jobs for a single company)
+const MOCK_JOBS: Job[] = [
   {
     id: "1",
     company_id: "1",
-    job_id: "1",
     company_name: "Lovin Malta",
+    company_logo_url: undefined,
     position_title: "Senior Content Writer",
-    first_name: "Sarah",
-    last_name: "Johnson",
-    email: "sarah.j@email.com",
-    contact_number: "+356 2123 4567",
+    basis: ["Full-Time"],
     location: "Valletta, Malta",
-    cv_url: "/uploads/sarah-johnson-cv.pdf",
-    overall_match_score: 92,
-    preset_questions_score: 88,
-    final_recommendation: "Strong Match" as Recommendation,
-    current_employer: "Times of Malta",
-    current_position: "Senior Journalist",
-    years_experience: 8,
-    average_duration: 2.5,
-    technical_skills: ["SEO", "Content Strategy", "Adobe Creative Suite", "CMS Management"],
-    soft_skills: ["Communication", "Creativity", "Time Management"],
-    languages: ["English (Native)", "Maltese (Fluent)", "Italian (Intermediate)"],
-    relevant_experience: "8 years in journalism and content creation, specializing in digital media",
-    qualifications: "BA in Journalism, University of Malta",
-    green_flags: [
-      "Strong SEO expertise demonstrated in previous roles",
-      "Proven track record of viral content creation",
-      "Experience managing editorial teams"
-    ],
-    red_flags: [
-      "May expect higher salary than budgeted"
-    ],
-    overall_reasoning: "Excellent match with extensive relevant experience in digital media and proven SEO skills.",
-    preset_reasoning: "Strong answers to screening questions, particularly regarding SEO strategy and portfolio samples.",
-    fit_notes: "Would be an excellent addition to the editorial team. Experience level matches senior requirements.",
-    status: "NEW",
-    applied_date: "2024-02-05T10:00:00Z",
-    is_starred: false,
-    created_at: "2024-02-05T10:00:00Z",
-    updated_at: "2024-02-05T10:00:00Z"
+    salary_band_id: "5",
+    seniority: "Senior",
+    description: "We're looking for a talented content writer...",
+    about_company: "Malta's leading digital media company",
+    industry: "Media & Publishing",
+    category_ids: ["2"],
+    preset_questions: ["What's your experience with SEO?", "Can you provide writing samples?"],
+    status: "OPEN" as JobStatus,
+    date_posted: "2024-01-15T10:00:00Z",
+    closing_date: "2024-03-15T10:00:00Z",
+    applicant_count: 12,
+    created_at: "2024-01-15T10:00:00Z",
+    updated_at: "2024-01-15T10:00:00Z",
   },
   {
     id: "2",
     company_id: "1",
-    job_id: "1",
-    first_name: "Michael",
-    last_name: "Chen",
-    email: "m.chen@email.com",
-    contact_number: "+356 7912 3456",
+    company_name: "Lovin Malta",
+    company_logo_url: undefined,
+    position_title: "Social Media Manager",
+    basis: ["Full-Time", "Hybrid"],
     location: "Sliema, Malta",
-    cv_url: "/uploads/michael-chen-cv.pdf",
-    overall_match_score: 78,
-    preset_questions_score: 82,
-    final_recommendation: "Possible Fit" as Recommendation,
-    current_employer: "Independent Freelancer",
-    current_position: "Freelance Writer",
-    years_experience: 4,
-    average_duration: 1.5,
-    technical_skills: ["Content Writing", "Social Media", "Basic SEO"],
-    soft_skills: ["Adaptability", "Creativity"],
-    languages: ["English (Native)", "Mandarin (Native)"],
-    relevant_experience: "4 years freelance writing with focus on lifestyle and travel content",
-    qualifications: "BA in English Literature, University of London",
-    green_flags: [
-      "Strong writing samples provided",
-      "Flexible and adaptable work style"
-    ],
-    red_flags: [
-      "Limited SEO experience compared to requirements",
-      "No team management experience"
-    ],
-    overall_reasoning: "Good writer but lacks some technical SEO skills required for senior role.",
-    preset_reasoning: "Adequate answers but showed gaps in advanced SEO knowledge.",
-    fit_notes: "Could be considered if willing to take more junior role or with additional training.",
-    status: "SCREENING",
-    applied_date: "2024-02-03T10:00:00Z",
-    is_starred: true,
-    created_at: "2024-02-03T10:00:00Z",
-    updated_at: "2024-02-03T10:00:00Z"
+    salary_band_id: "6",
+    seniority: "Mid-Level",
+    description: "Join our digital team to lead social content...",
+    about_company: "Malta's leading digital media company",
+    industry: "Media & Publishing",
+    category_ids: ["2"],
+    preset_questions: ["Describe your experience managing brand accounts."],
+    status: "OPEN" as JobStatus,
+    date_posted: "2024-02-01T10:00:00Z",
+    closing_date: "2024-03-20T10:00:00Z",
+    applicant_count: 6,
+    created_at: "2024-02-01T10:00:00Z",
+    updated_at: "2024-02-01T10:00:00Z",
   },
   {
     id: "3",
     company_id: "1",
-    job_id: "1",
-    first_name: "Emma",
-    last_name: "Williams",
-    email: "emma.w@email.com",
-    location: "St. Julian's, Malta",
-    cv_url: "/uploads/emma-williams-cv.pdf",
-    overall_match_score: 95,
-    preset_questions_score: 94,
-    final_recommendation: "Strong Match" as Recommendation,
-    current_employer: "MaltaToday",
-    current_position: "Head of Digital Content",
-    years_experience: 10,
-    average_duration: 3.5,
-    technical_skills: ["SEO", "Content Strategy", "Team Leadership", "Analytics", "CMS"],
-    soft_skills: ["Leadership", "Strategic Thinking", "Communication"],
-    languages: ["English (Native)", "Maltese (Fluent)"],
-    relevant_experience: "10 years in digital journalism with 5 years in leadership roles",
-    qualifications: "MA in Digital Media, University of Malta",
-    green_flags: [
-      "Exceptional SEO and content strategy expertise",
-      "Proven leadership and team management skills",
-      "Strong local market knowledge"
-    ],
-    red_flags: [],
-    overall_reasoning: "Outstanding candidate with all required skills and local market expertise.",
-    preset_reasoning: "Exemplary answers demonstrating deep SEO knowledge and strategic thinking.",
-    fit_notes: "Top candidate - immediate hire recommended.",
-    status: "NEW",
-    applied_date: "2024-02-06T10:00:00Z",
-    is_starred: false,
-    created_at: "2024-02-06T10:00:00Z",
-    updated_at: "2024-02-06T10:00:00Z"
+    company_name: "Lovin Malta",
+    company_logo_url: undefined,
+    position_title: "Junior Video Editor",
+    basis: ["Full-Time"],
+    location: "Valletta, Malta",
+    salary_band_id: "3",
+    seniority: "Entry Level",
+    description: "We're looking for an eager video editor...",
+    about_company: "Malta's leading digital media company",
+    industry: "Media & Publishing",
+    category_ids: ["2"],
+    preset_questions: ["Share a portfolio link."],
+    status: "CLOSED" as JobStatus,
+    date_posted: "2023-11-10T10:00:00Z",
+    closing_date: "2023-12-10T10:00:00Z",
+    applicant_count: 19,
+    created_at: "2023-11-10T10:00:00Z",
+    updated_at: "2023-12-15T10:00:00Z",
   },
-  {
-    id: "4",
-    company_id: "1",
-    job_id: "1",
-    first_name: "James",
-    last_name: "Brown",
-    email: "j.brown@email.com",
-    location: "Msida, Malta",
-    cv_url: "/uploads/james-brown-cv.pdf",
-    overall_match_score: 58,
-    preset_questions_score: 62,
-    final_recommendation: "Not Recommended" as Recommendation,
-    current_employer: "Local Blog",
-    current_position: "Content Contributor",
-    years_experience: 2,
-    technical_skills: ["Basic Writing", "Social Media"],
-    soft_skills: ["Enthusiasm", "Quick Learner"],
-    languages: ["English (Native)"],
-    relevant_experience: "2 years part-time blogging",
-    qualifications: "Ongoing BA in Communications",
-    green_flags: [
-      "Enthusiastic and eager to learn"
-    ],
-    red_flags: [
-      "Insufficient experience for senior role",
-      "No SEO knowledge demonstrated",
-      "Incomplete degree"
-    ],
-    overall_reasoning: "Not qualified for senior position. Lacks required experience and technical skills.",
-    preset_reasoning: "Weak answers showing lack of SEO understanding.",
-    fit_notes: "Not suitable for this role.",
-    status: "NEW",
-    applied_date: "2024-02-04T10:00:00Z",
-    is_starred: false,
-    created_at: "2024-02-04T10:00:00Z",
-    updated_at: "2024-02-04T10:00:00Z"
-  }
 ]
 
-export default function ClientApplicantsPage() {
+export default function ClientJobsPage() {
   const params = useParams()
-  const jobId = params.jobId as string
+  const companyId = params.companyId as string
 
-  const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null)
 
-  const filteredApplicants = applicants.filter(applicant => 
-    applicant.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    applicant.last_name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const jobs = useMemo(() => MOCK_JOBS.filter((j) => j.company_id === companyId), [companyId])
 
-  const getScoreColor = (score: number) => {
-    if (score >= 85) return "text-green-600 font-semibold"
-    if (score >= 70) return "text-yellow-600 font-semibold"
-    return "text-red-600 font-semibold"
-  }
+  const filteredJobs = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return jobs
+    return jobs.filter((job) => job.position_title.toLowerCase().includes(q) || job.id.includes(q))
+  }, [jobs, searchQuery])
 
-  const getRecommendationBadge = (recommendation: Recommendation) => {
-    const variants: Record<Recommendation, "success" | "warning" | "error"> = {
-      "Strong Match": "success",
-      "Possible Fit": "warning",
-      "Not Recommended": "error"
+  const getStatusBadge = (status: JobStatus) => {
+    const variants: Record<JobStatus, "default" | "success" | "error"> = {
+      DRAFT: "default",
+      OPEN: "success",
+      CLOSED: "error",
     }
-    return <Badge variant={variants[recommendation]}>{recommendation}</Badge>
+    return <Badge variant={variants[status]}>{status}</Badge>
   }
 
   return (
-    <>
-      <div className="p-6 max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Applicants</h1>
-          <p className="text-gray-600">Review applicants for this position</p>
-        </div>
-
-        {/* Controls */}
-        <div className="flex justify-between items-center mb-6 gap-4">
-          <Input
-            placeholder="Search applicants..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-md"
-          />
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Total</div>
-            <div className="text-2xl font-bold">{applicants.length}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Strong Matches</div>
-            <div className="text-2xl font-bold text-green-600">
-              {applicants.filter(a => a.final_recommendation === "Strong Match").length}
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Possible Fits</div>
-            <div className="text-2xl font-bold text-yellow-600">
-              {applicants.filter(a => a.final_recommendation === "Possible Fit").length}
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Not Recommended</div>
-            <div className="text-2xl font-bold text-red-600">
-              {applicants.filter(a => a.final_recommendation === "Not Recommended").length}
-            </div>
-          </div>
-        </div>
-
-        {/* Table */}
-        {isLoading ? (
-          <TableSkeleton rows={5} />
-        ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Applicant Name</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead className="text-center">Overall Score</TableHead>
-                  <TableHead className="text-center">PreQ Score</TableHead>
-                  <TableHead>Recommendation</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredApplicants.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                      {searchQuery ? "No applicants found matching your search" : "No applicants yet"}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredApplicants.map(applicant => (
-                    <TableRow 
-                      key={applicant.id}
-                      onClick={() => setSelectedApplicant(applicant)}
-                      className="cursor-pointer hover:bg-gray-50"
-                    >
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {applicant.first_name} {applicant.last_name}
-                          </div>
-                          <div className="text-sm text-gray-500">{applicant.email}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-gray-600">{applicant.location}</TableCell>
-                      <TableCell className="text-center">
-                        <span className={getScoreColor(applicant.overall_match_score)}>
-                          {applicant.overall_match_score}%
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className={getScoreColor(applicant.preset_questions_score)}>
-                          {applicant.preset_questions_score}%
-                        </span>
-                      </TableCell>
-                      <TableCell>{getRecommendationBadge(applicant.final_recommendation)}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Jobs</h1>
+        <p className="text-gray-600">View your job postings and applicants</p>
       </div>
 
-      {/* Applicant Details Panel - From Phase 5 */}
-      {selectedApplicant && (
-        <ApplicantDetailsPanel
-          applicant={selectedApplicant}
-          onClose={() => setSelectedApplicant(null)}
+      {/* Controls */}
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <Input
+          placeholder="Search by job title or Job ID..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-md"
         />
+      </div>
+
+      {/* Table */}
+      {isLoading ? (
+        <TableSkeleton rows={6} />
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Job ID</TableHead>
+                <TableHead>Position Title</TableHead>
+                <TableHead>Date Posted</TableHead>
+                <TableHead>Closing Date</TableHead>
+                <TableHead className="text-center">Applicants</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredJobs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                    {searchQuery ? "No jobs found matching your search" : "No jobs available"}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredJobs.map((job) => (
+                  <TableRow key={job.id}>
+                    <TableCell className="font-mono text-sm">{job.id}</TableCell>
+                    <TableCell className="font-medium">{job.position_title}</TableCell>
+                    <TableCell className="text-gray-600">
+                      {format(new Date(job.date_posted), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell className="text-gray-600">
+                      {job.closing_date ? format(new Date(job.closing_date), "MMM d, yyyy") : "—"}
+                    </TableCell>
+                    <TableCell className="text-center">{job.applicant_count ?? 0}</TableCell>
+                    <TableCell>{getStatusBadge(job.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/company/${companyId}/jobs/${job.id}/applicants`}>
+                          View Applicants
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       )}
-    </>
+    </div>
   )
 }
