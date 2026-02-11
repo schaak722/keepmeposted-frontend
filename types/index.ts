@@ -1,41 +1,54 @@
 // ============================================
-// ENUMS
+// "ENUM-LIKE" CONSTANTS + STRING UNION TYPES
+// (Option A)
 // ============================================
+//
+// We export runtime constants (e.g. Role.CLIENT) AND
+// strongly-typed string unions (type Role = "client" | ...).
+//
+// This fixes build failures like:
+//   Type '"NEW"' is not assignable to type 'ApplicantStatus'.
+// while keeping existing runtime code intact.
 
-export enum Role {
-  IT_ADMIN = "it_admin",
-  BUSINESS_ADMIN = "business_admin",
-  CLIENT = "client"
-}
+export const Role = {
+  IT_ADMIN: "it_admin",
+  BUSINESS_ADMIN: "business_admin",
+  CLIENT: "client",
+} as const
+export type Role = (typeof Role)[keyof typeof Role]
 
-export enum JobStatus {
-  DRAFT = "DRAFT",
-  OPEN = "OPEN",
-  CLOSED = "CLOSED"
-}
+export const JobStatus = {
+  DRAFT: "DRAFT",
+  OPEN: "OPEN",
+  CLOSED: "CLOSED",
+} as const
+export type JobStatus = (typeof JobStatus)[keyof typeof JobStatus]
 
-export enum EmploymentBasis {
-  FULL_TIME = "Full-Time",
-  PART_TIME = "Part-Time",
-  FREELANCE = "Freelance",
-  HYBRID = "Hybrid",
-  TEMPORARY = "Temporary"
-}
+export const EmploymentBasis = {
+  FULL_TIME: "Full-Time",
+  PART_TIME: "Part-Time",
+  FREELANCE: "Freelance",
+  HYBRID: "Hybrid",
+  TEMPORARY: "Temporary",
+} as const
+export type EmploymentBasis = (typeof EmploymentBasis)[keyof typeof EmploymentBasis]
 
-export enum ApplicantStatus {
-  NEW = "NEW",
-  SCREENING = "SCREENING",
-  INTERVIEWING = "INTERVIEWING",
-  OFFERED = "OFFERED",
-  REJECTED = "REJECTED",
-  HIRED = "HIRED"
-}
+export const ApplicantStatus = {
+  NEW: "NEW",
+  SCREENING: "SCREENING",
+  INTERVIEWING: "INTERVIEWING",
+  OFFERED: "OFFERED",
+  REJECTED: "REJECTED",
+  HIRED: "HIRED",
+} as const
+export type ApplicantStatus = (typeof ApplicantStatus)[keyof typeof ApplicantStatus]
 
-export enum Recommendation {
-  STRONG_MATCH = "Strong Match",
-  POSSIBLE_FIT = "Possible Fit",
-  NOT_RECOMMENDED = "Not Recommended"
-}
+export const Recommendation = {
+  STRONG_MATCH: "Strong Match",
+  POSSIBLE_FIT: "Possible Fit",
+  NOT_RECOMMENDED: "Not Recommended",
+} as const
+export type Recommendation = (typeof Recommendation)[keyof typeof Recommendation]
 
 // ============================================
 // SALARY BANDS
@@ -45,7 +58,7 @@ export interface SalaryBand {
   id: string
   label: string
   min: number
-  max: number
+  max: number | null
   currency: string
 }
 
@@ -186,7 +199,7 @@ export interface JobCreate {
   status?: JobStatus
 }
 
-export interface JobUpdate extends Partial<Omit<JobCreate, 'company_id'>> {}
+export interface JobUpdate extends Partial<Omit<JobCreate, "company_id">> {}
 
 export interface JobStats {
   total_applicants: number
@@ -250,20 +263,4 @@ export interface PaginatedResponse<T> {
 
 export interface ApiError {
   message: string
-  errors?: Record<string, string[]>
-  status_code: number
-}
-
-// ============================================
-// FORM STATES
-// ============================================
-
-export interface LoadingState {
-  isLoading: boolean
-  error?: string
-}
-
-export interface FormState<T> extends LoadingState {
-  data?: T
-  isDirty: boolean
-}
+  errors?: Record<s
