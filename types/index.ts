@@ -63,13 +63,16 @@ export interface SalaryBand {
 }
 
 export const SALARY_BANDS: SalaryBand[] = [
-  { id: "1", label: "€10,000 - €20,000", min: 10000, max: 20000, currency: "EUR" },
-  { id: "2", label: "€20,000 - €30,000", min: 20000, max: 30000, currency: "EUR" },
-  { id: "3", label: "€30,000 - €40,000", min: 30000, max: 40000, currency: "EUR" },
-  { id: "4", label: "€40,000 - €50,000", min: 40000, max: 50000, currency: "EUR" },
-  { id: "5", label: "€50,000 - €75,000", min: 50000, max: 75000, currency: "EUR" },
-  { id: "6", label: "€75,000 - €100,000", min: 75000, max: 100000, currency: "EUR" },
-  { id: "7", label: "€100,000+", min: 100000, max: null, currency: "EUR" },
+  // Preset annual gross salary bands (EUR) per Change Spec v1.2
+  { id: "any", label: "Any", min: 0, max: null, currency: "EUR" },
+  { id: "1", label: "€11,532 - €16,000", min: 11532, max: 16000, currency: "EUR" },
+  { id: "2", label: "€16,000 - €20,000", min: 16000, max: 20000, currency: "EUR" },
+  { id: "3", label: "€20,000 - €24,000", min: 20000, max: 24000, currency: "EUR" },
+  { id: "4", label: "€24,000 - €30,000", min: 24000, max: 30000, currency: "EUR" },
+  { id: "5", label: "€30,000 - €45,000", min: 30000, max: 45000, currency: "EUR" },
+  { id: "6", label: "€45,000 - €60,000", min: 45000, max: 60000, currency: "EUR" },
+  { id: "7", label: "€60,000 - €80,000", min: 60000, max: 80000, currency: "EUR" },
+  { id: "8", label: "€80,000 or more", min: 80000, max: null, currency: "EUR" },
 ]
 
 // ============================================
@@ -82,16 +85,12 @@ export interface JobCategory {
 }
 
 export const JOB_CATEGORIES: JobCategory[] = [
+  // Temporary stub (5 categories) until the full controlled list is provided
   { id: "1", name: "Technology & IT" },
   { id: "2", name: "Marketing & Communications" },
   { id: "3", name: "Sales & Business Development" },
   { id: "4", name: "Human Resources" },
   { id: "5", name: "Finance & Accounting" },
-  { id: "6", name: "Operations & Logistics" },
-  { id: "7", name: "Design & Creative" },
-  { id: "8", name: "Customer Service" },
-  { id: "9", name: "Healthcare & Medical" },
-  { id: "10", name: "Education & Training" },
 ]
 
 // ============================================
