@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -131,7 +132,7 @@ export default function CompaniesPage() {
           onClick={handleCreateCompany}
           className="bg-brand-blue hover:bg-brand-blue/90"
         >
-          + Add Company
+          Add Company
         </Button>
       </div>
 
@@ -149,14 +150,13 @@ export default function CompaniesPage() {
                 <TableHead>Industry</TableHead>
                 <TableHead className="text-center">Jobs</TableHead>
                 <TableHead className="text-center">Applicants</TableHead>
-                <TableHead>Contact Person</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredCompanies.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                     {searchQuery ? "No companies found matching your search" : "No companies yet. Click 'Add Company' to create one."}
                   </TableCell>
                 </TableRow>
@@ -190,22 +190,15 @@ export default function CompaniesPage() {
                     <TableCell className="text-gray-600">{company.industry}</TableCell>
                     <TableCell className="text-center">{company.job_count}</TableCell>
                     <TableCell className="text-center">{company.applicant_count}</TableCell>
-                    <TableCell className="text-sm text-gray-600">
-                      {company.contact_person_name && (
-                        <div>
-                          <div>{company.contact_person_name}</div>
-                          <div className="text-xs text-gray-500">{company.contact_person_email}</div>
-                        </div>
-                      )}
-                    </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditCompany(company)}
-                      >
-                        Edit
-                      </Button>
+                      <Link href={`/jobs?companyId=${company.id}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                        >
+                          View Jobs
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))
