@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -10,8 +11,8 @@ import { TableSkeleton } from "@/components/ui/skeleton"
 import { JobModal } from "@/components/modals/job-modal"
 import type { Job, JobStatus } from "@/types"
 import { useToast } from "@/hooks/use-toast"
-import { format } from "date-fns"
 import { useAuth } from "@/contexts/auth-context"
+import { format } from "date-fns"
 
 // Mock data
 const MOCK_JOBS: Job[] = [
@@ -62,8 +63,6 @@ const MOCK_JOBS: Job[] = [
 ]
 
 export default function JobsPage() {
-  const { activeCompanyId, activeCompany } = useAuth()
-
   const [jobs, setJobs] = useState<Job[]>(MOCK_JOBS)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -71,13 +70,27 @@ export default function JobsPage() {
   const [editingJob, setEditingJob] = useState<Job | null>(null)
   const { toast } = useToast()
 
+  const { activeCompanyId, activeCompany } = useAuth()
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
-const scopedJobs = useMemo(() => {
-  if (!activeCompanyId) return []
-  return scopedJobs.filter((job) => job.company_id === activeCompanyId)
-}, [activeCompanyId])
+  const queryCompanyId = searchParams.get("companyId")
+  const effectiveCompanyId = queryCompanyId || activeCompanyId
 
-  const filteredJobs = jobs.filter(job => 
+  const effectiveCompanyName = useMemo(() => {
+    if (queryCompanyId) {
+      const fromJobs = jobs.find(j => j.company_id === queryCompanyId)?.company_name
+      return fromJobs || `Company ${queryCompanyId}`
+    }
+    return activeCompany?.company_name || (effectiveCompanyId ? `Company ${effectiveCompanyId}` : "All companies")
+  }, [activeCompany?.company_name, effectiveCompanyId, jobs, queryCompanyId])
+
+  const scopedJobs = useMemo(() => {
+    if (!effectiveCompanyId) return jobs
+    return jobs.filter(j => j.company_id === effectiveCompanyId)
+  }, [effectiveCompanyId, jobs])
+
+  const filteredJobs = scopedJobs.filter(job => 
     job.position_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     job.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     job.id.includes(searchQuery)
@@ -147,7 +160,24 @@ const scopedJobs = useMemo(() => {
       {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Jobs</h1>
-        <p className="text-gray-600">Manage job postings across all companies</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-gray-600">
+            {effectiveCompanyId ? (
+              <>Showing jobs for: <span className="font-medium">{effectiveCompanyName}</span></>
+            ) : (
+              <>Manage job postings across all companies</>
+            )}
+          </p>
+          {queryCompanyId && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/jobs")}
+            >
+              Clear filter
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Controls */}
