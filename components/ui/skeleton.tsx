@@ -13,7 +13,10 @@ function Skeleton({
 }
 
 // Pre-built skeleton patterns
-function TableSkeleton({ rows = 5 }: { rows?: number }) {
+// Note: some pages pass a `columns` prop; it's optional and intentionally ignored here
+// because this skeleton renders full-width rows.
+function TableSkeleton({ rows = 5, columns }: { rows?: number; columns?: number }) {
+  void columns
   return (
     <div className="space-y-3">
       {Array.from({ length: rows }).map((_, i) => (
