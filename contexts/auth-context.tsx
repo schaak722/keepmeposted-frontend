@@ -53,9 +53,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      // Call real API
-      const response = await apiClient.post("/auth/login", { email, password }) as any
-      const { access_token, refresh_token, user } = response.data
+      // ============================================
+      // MOCK LOGIN (for testing without backend)
+      // ============================================
+      const MOCK_USERS = {
+        "admin@test.com": {
+          user: {
+            id: "1",
+            email: "admin@test.com",
+            full_name: "Admin User",
+            role: "it_admin" as Role,
+            memberships: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          password: "Admin123!"
+        },
+        "ops@test.com": {
+          user: {
+            id: "2",
+            email: "ops@test.com",
+            full_name: "Operations Manager",
+            role: "business_admin" as Role,
+            memberships: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          password: "Admin123!"
+        },
+        "client@test.com": {
+          user: {
+            id: "3",
+            email: "client@test.com",
+            full_name: "Client User",
+            role: "client" as Role,
+            memberships: [
+              {
+                company_id: "1",
+                company_name: "Lovin Malta",
+                role: "client" as Role,
+                is_active: true
+              }
+            ],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          password: "Client123!"
+        }
+      }
+
+      const mockUser = MOCK_USERS[email as keyof typeof MOCK_USERS]
+      
+      if (!mockUser || mockUser.password !== password) {
+        throw new Error("Invalid credentials")
+      }
+
+      // Mock tokens
+      const access_token = "mock_access_token_" + Date.now()
+      const refresh_token = "mock_refresh_token_" + Date.now()
+      const user = mockUser.user
 
       // Store in localStorage
       localStorage.setItem("access_token", access_token)
@@ -77,6 +133,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         router.push("/companies")
       }
+
+      // ============================================
+      // REAL API LOGIN (commented out for now)
+      // ============================================
+      /*
+      const response = await apiClient.post("/auth/login", { email, password }) as any
+      const { access_token, refresh_token, user } = response.data
+
+      localStorage.setItem("access_token", access_token)
+      localStorage.setItem("refresh_token", refresh_token)
+      localStorage.setItem("user", JSON.stringify(user))
+
+      if (user.role === "client" && user.memberships.length > 0) {
+        const defaultCompanyId = user.memberships[0].company_id
+        localStorage.setItem("active_company_id", defaultCompanyId)
+        setActiveCompanyId(defaultCompanyId)
+      }
+
+      setSession({ user, access_token, refresh_token })
+      
+      if (user.role === "client") {
+        router.push(`/company/${user.memberships[0].company_id}/jobs`)
+      } else {
+        router.push("/companies")
+      }
+      */
     } catch (error) {
       console.error("Login failed:", error)
       throw error
