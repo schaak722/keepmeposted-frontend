@@ -178,9 +178,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setActiveCompany = (companyId: string) => {
     localStorage.setItem("active_company_id", companyId)
     setActiveCompanyId(companyId)
-    
-    // Redirect to new company's jobs page
-    router.push(`/company/${companyId}/jobs`)
+
+    // Only client users should be routed into the client portal.
+    // Internal users use the active company only as a scope/filter.
+    if (session?.user.role === "client") {
+      router.push(`/company/${companyId}/jobs`)
+    }
   }
 
   const hasRole = (role: Role | Role[]): boolean => {
