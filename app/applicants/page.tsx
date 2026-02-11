@@ -1,8 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -10,9 +9,10 @@ import { Badge } from "@/components/ui/badge"
 import { TableSkeleton } from "@/components/ui/skeleton"
 import type { Applicant, Recommendation } from "@/types"
 import { useToast } from "@/hooks/use-toast"
+import { format } from "date-fns"
 import { useAuth } from "@/contexts/auth-context"
 
-// Keep the existing pattern: mock data in-page
+// Mock data
 const MOCK_APPLICANTS: Applicant[] = [
   {
     id: "1",
@@ -34,193 +34,220 @@ const MOCK_APPLICANTS: Applicant[] = [
     technical_skills: ["SEO", "Content Strategy", "Adobe Creative Suite"],
     soft_skills: ["Communication", "Creativity"],
     languages: ["English", "Maltese"],
+    status: "NEW",
+    applied_date: "2024-02-05T10:00:00Z",
+    created_at: "2024-02-05T10:00:00Z",
+    updated_at: "2024-02-05T10:00:00Z"
   },
   {
     id: "2",
-    company_id: "1",
-    job_id: "1",
-    company_name: "Lovin Malta",
-    position_title: "Senior Content Writer",
-    first_name: "Mark",
-    last_name: "Borg",
-    email: "mark.b@email.com",
-    location: "Sliema, Malta",
-    cv_url: "/uploads/mark-borg-cv.pdf",
-    overall_match_score: 76,
-    preset_questions_score: 72,
-    final_recommendation: "Possible Fit" as Recommendation,
-    current_employer: "Independent",
-    current_position: "Freelance Writer",
-    years_experience: 5,
-    technical_skills: ["Copywriting", "Social Media"],
-    soft_skills: ["Adaptability", "Time Management"],
-    languages: ["English", "Maltese"],
-  },
-  {
-    id: "3",
     company_id: "2",
     job_id: "2",
-    company_name: "TechCorp Malta",
+    company_name: "Tech Solutions Ltd",
     position_title: "Full Stack Developer",
-    first_name: "Elena",
-    last_name: "Rossi",
-    email: "elena.r@email.com",
-    location: "Birkirkara, Malta",
-    cv_url: "/uploads/elena-rossi-cv.pdf",
-    overall_match_score: 89,
-    preset_questions_score: 81,
-    final_recommendation: "Strong Match" as Recommendation,
-    current_employer: "Software House",
-    current_position: "Developer",
-    years_experience: 6,
-    technical_skills: ["React", "Node.js", "PostgreSQL"],
+    first_name: "Michael",
+    last_name: "Chen",
+    email: "m.chen@email.com",
+    location: "Sliema, Malta",
+    cv_url: "/uploads/michael-chen-cv.pdf",
+    overall_match_score: 78,
+    preset_questions_score: 82,
+    final_recommendation: "Possible Fit" as Recommendation,
+    current_employer: "StartupX",
+    current_position: "Software Developer",
+    years_experience: 4,
+    technical_skills: ["React", "Node.js", "Python"],
     soft_skills: ["Problem Solving", "Teamwork"],
-    languages: ["English", "Italian"],
-  },
+    status: "SCREENING",
+    applied_date: "2024-02-03T10:00:00Z",
+    created_at: "2024-02-03T10:00:00Z",
+    updated_at: "2024-02-03T10:00:00Z"
+  }
 ]
 
-function recommendationBadgeVariant(rec: Recommendation) {
-  switch (rec) {
-    case "Strong Match":
-      return "default"
-    case "Possible Fit":
-      return "secondary"
-    case "Not Recommended":
-      return "destructive"
-    default:
-      return "outline"
-  }
-}
-
 export default function ApplicantsPage() {
-  const { toast } = useToast()
-  const { activeCompanyId, activeCompany, user } = useAuth()
-  const searchParams = useSearchParams()
-
-  // Local state (keeps your current repo approach flexible)
-  const [applicants] = useState<Applicant[]>(MOCK_APPLICANTS)
-  const [isLoading] = useState(false)
+  const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS)
+  const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const { toast } = useToast()
 
-  // Supports /applicants?companyId=<id> (e.g., from Companies “View Applicants”)
+  const { activeCompanyId, activeCompany } = useAuth()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
   const queryCompanyId = searchParams.get("companyId")
-  const effectiveCompanyId = queryCompanyId || activeCompanyId || null
+  const effectiveCompanyId = queryCompanyId || activeCompanyId
 
   const effectiveCompanyName = useMemo(() => {
     if (queryCompanyId) {
-      const fromApplicants = applicants.find((a) => a.company_id === queryCompanyId)?.company_name
+      const fromApplicants = applicants.find(a => a.company_id === queryCompanyId)?.company_name
       return fromApplicants || `Company ${queryCompanyId}`
     }
-    return (
-      // depending on your auth context shape (some places use name vs company_name)
-      // @ts-expect-error - handle either field safely
-      activeCompany?.name ||
-      // @ts-expect-error - handle either field safely
-      activeCompany?.company_name ||
-      (effectiveCompanyId ? `Company ${effectiveCompanyId}` : "All companies")
-    )
-  }, [activeCompany, applicants, effectiveCompanyId, queryCompanyId])
+    return activeCompany?.company_name || (effectiveCompanyId ? `Company ${effectiveCompanyId}` : "All companies")
+  }, [activeCompany?.company_name, applicants, effectiveCompanyId, queryCompanyId])
 
-  // ✅ FIX: filter the SOURCE array (applicants), never scopedApplicants inside itself
-  const scopedApplicants = useMemo<Applicant[]>(() => {
+  const scopedApplicants = useMemo(() => {
     if (!effectiveCompanyId) return applicants
-    return applicants.filter((a) => a.company_id === effectiveCompanyId)
+    return applicants.filter(a => a.company_id === effectiveCompanyId)
   }, [applicants, effectiveCompanyId])
 
-  const filteredApplicants = useMemo<Applicant[]>(() => {
-    const q = searchQuery.trim().toLowerCase()
-    if (!q) return scopedApplicants
-    return scopedApplicants.filter((a) => {
-      const fullName = `${a.first_name} ${a.last_name}`.toLowerCase()
-      return (
-        fullName.includes(q) ||
-        (a.company_name || "").toLowerCase().includes(q) ||
-        (a.position_title || "").toLowerCase().includes(q) ||
-        (a.location || "").toLowerCase().includes(q)
-      )
-    })
-  }, [scopedApplicants, searchQuery])
+  const filteredApplicants = scopedApplicants.filter(applicant => 
+    applicant.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    applicant.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    applicant.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    applicant.position_title?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const handleDownloadCV = async (applicant: Applicant) => {
-    // Mock-only: keep behaviour, but don’t break build
-    toast({
-      title: "Downloading CV",
-      description: `Downloading CV for ${applicant.first_name} ${applicant.last_name}`,
-    })
+    try {
+      // In production, this would call: GET /companies/:companyId/applicants/:applicantId/cv/download
+      toast({
+        title: "Downloading CV",
+        description: `Downloading CV for ${applicant.first_name} ${applicant.last_name}`,
+        variant: "success"
+      })
+      
+      // Simulate download
+      // In production: window.open(cv_download_url)
+      console.log("Downloading CV from:", applicant.cv_url)
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Failed to download CV. Please try again.",
+        variant: "error"
+      })
+    }
   }
 
-  const scopeLabel =
-    (queryCompanyId ? `${effectiveCompanyName} (filter)` : effectiveCompanyName) ||
-    (user?.role === "CLIENT" ? "Your company" : "No company selected")
+  const getRecommendationBadge = (recommendation: Recommendation) => {
+    const variants: Record<Recommendation, "success" | "warning" | "error"> = {
+      "Strong Match": "success",
+      "Possible Fit": "warning",
+      "Not Recommended": "error"
+    }
+    return <Badge variant={variants[recommendation]}>{recommendation}</Badge>
+  }
+
+  const getScoreColor = (score: number) => {
+    if (score >= 85) return "text-green-600 font-semibold"
+    if (score >= 70) return "text-yellow-600 font-semibold"
+    return "text-red-600 font-semibold"
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Applicants</h1>
-          <p className="text-sm text-muted-foreground">Showing applicants for: {scopeLabel}</p>
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Applicants</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-gray-600">
+            {effectiveCompanyId ? (
+              <>Showing applicants for: <span className="font-medium">{effectiveCompanyName}</span></>
+            ) : (
+              <>View all applicants across all companies and jobs</>
+            )}
+          </p>
+          {queryCompanyId && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/applicants")}
+            >
+              Clear filter
+            </Button>
+          )}
         </div>
-
-        {queryCompanyId ? (
-          <Button variant="outline" asChild>
-            <Link href="/applicants">Clear filter</Link>
-          </Button>
-        ) : null}
       </div>
 
-      <div className="flex items-center gap-3">
+      {/* Controls */}
+      <div className="flex justify-between items-center mb-6 gap-4">
         <Input
-          placeholder="Search applicants..."
+          placeholder="Search by name, company, or position..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-md"
         />
       </div>
 
-      <div className="rounded-lg border bg-card">
-        {isLoading ? (
-          <div className="p-4">
-            <TableSkeleton rows={8} columns={6} />
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-sm text-gray-600">Total Applicants</div>
+          <div className="text-2xl font-bold">{applicants.length}</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-sm text-gray-600">Strong Matches</div>
+          <div className="text-2xl font-bold text-green-600">
+            {applicants.filter(a => a.final_recommendation === "Strong Match").length}
           </div>
-        ) : (
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-sm text-gray-600">Possible Fits</div>
+          <div className="text-2xl font-bold text-yellow-600">
+            {applicants.filter(a => a.final_recommendation === "Possible Fit").length}
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-sm text-gray-600">Not Recommended</div>
+          <div className="text-2xl font-bold text-red-600">
+            {applicants.filter(a => a.final_recommendation === "Not Recommended").length}
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      {isLoading ? (
+        <TableSkeleton rows={5} />
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Applicant Name</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead>Position</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead className="text-right">Overall</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Company Applied For</TableHead>
+                <TableHead>Position Applied For</TableHead>
+                <TableHead>Date Applied</TableHead>
+                <TableHead className="text-center">Overall Score</TableHead>
                 <TableHead>Recommendation</TableHead>
-                <TableHead className="text-right">CV</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
               {filteredApplicants.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
-                    No applicants found.
+                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                    {searchQuery ? "No applicants found matching your search" : "No applicants yet"}
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredApplicants.map((a) => (
-                  <TableRow key={a.id}>
-                    <TableCell className="font-medium">
-                      {a.first_name} {a.last_name}
-                    </TableCell>
-                    <TableCell>{a.company_name}</TableCell>
-                    <TableCell>{a.position_title}</TableCell>
-                    <TableCell>{a.location}</TableCell>
-                    <TableCell className="text-right">{a.overall_match_score}%</TableCell>
+                filteredApplicants.map(applicant => (
+                  <TableRow key={applicant.id}>
                     <TableCell>
-                      <Badge variant={recommendationBadgeVariant(a.final_recommendation)}>
-                        {a.final_recommendation}
-                      </Badge>
+                      <div>
+                        <div className="font-medium">
+                          {applicant.first_name} {applicant.last_name}
+                        </div>
+                        <div className="text-sm text-gray-500">{applicant.email}</div>
+                      </div>
                     </TableCell>
+                    <TableCell className="font-medium">{applicant.company_name}</TableCell>
+                    <TableCell>{applicant.position_title}</TableCell>
+                    <TableCell className="text-gray-600">
+                      {format(new Date(applicant.applied_date), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className={getScoreColor(applicant.overall_match_score)}>
+                        {applicant.overall_match_score}%
+                      </span>
+                    </TableCell>
+                    <TableCell>{getRecommendationBadge(applicant.final_recommendation)}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm" onClick={() => handleDownloadCV(a)}>
-                        Download
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownloadCV(applicant)}
+                      >
+                        Download CV
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -228,8 +255,8 @@ export default function ApplicantsPage() {
               )}
             </TableBody>
           </Table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
