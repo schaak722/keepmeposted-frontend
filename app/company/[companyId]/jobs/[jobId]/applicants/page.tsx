@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { useParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -169,9 +169,31 @@ const MOCK_APPLICANTS: Applicant[] = [
 
 export default function ClientApplicantsPage() {
   const params = useParams()
+  const router = useRouter()
+  const companyId = params.companyId as string
   const jobId = params.jobId as string
 
-  const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS)
+  // Minimal job metadata to prevent obvious cross-tenant job access in the mock UI.
+  // (When API is live, this should validate using the job payload returned by the backend.)
+  const KNOWN_JOBS_META: Array<{ id: string; company_id: string }> = [
+    { id: "1", company_id: "1" },
+    { id: "2", company_id: "1" },
+    { id: "3", company_id: "1" },
+  ]
+
+  useEffect(() => {
+    const job = KNOWN_JOBS_META.find((j) => j.id === jobId)
+    if (!job) return
+    if (job.company_id === companyId) return
+
+    // If someone tries to open a job that doesn't belong to this company,
+    // bounce them back to the company jobs list.
+    router.replace(`/company/${companyId}/jobs`)
+  }, [jobId, companyId, router])
+
+  const [applicants, setApplicants] = useState<Applicant[]>(
+    () => MOCK_APPLICANTS.filter((a) => a.company_id === companyId && a.job_id === jobId)
+  )
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null)
@@ -179,6 +201,12 @@ export default function ClientApplicantsPage() {
   const [sort, setSort] = useState<{ key: "name" | "overall" | "preq" | "recommendation"; dir: "asc" | "desc" }>(
     { key: "overall", dir: "desc" }
   )
+
+  useEffect(() => {
+    // Keep applicants in-sync with route params.
+    setApplicants(MOCK_APPLICANTS.filter((a) => a.company_id === companyId && a.job_id === jobId))
+    setSelectedApplicant(null)
+  }, [companyId, jobId])
 
   const visibleApplicants = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
