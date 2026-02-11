@@ -98,6 +98,16 @@ export const JOB_CATEGORIES: JobCategory[] = [
 // USER & MEMBERSHIP
 // ============================================
 
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface TokenPair {
+  access_token: string
+  refresh_token: string
+}
+
 export interface CompanyMembership {
   company_id: string
   company_name: string
@@ -280,3 +290,76 @@ export interface FormState<T> extends LoadingState {
   data?: T
   isDirty: boolean
 }
+
+// ============================================
+// FILTERS & PAGINATION
+// ============================================
+
+export interface PaginationParams {
+  page?: number
+  per_page?: number
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
+}
+
+export interface ApplicantFilters {
+  status?: ApplicantStatus
+  recommendation?: Recommendation
+  min_score?: number
+  max_score?: number
+  search?: string
+}
+
+export interface JobFilters {
+  status?: JobStatus
+  search?: string
+  category_ids?: string[]
+  basis?: EmploymentBasis[]
+  salary_band_id?: string
+}
+
+// ============================================
+// CV PROCESSING
+// ============================================
+
+export interface CVAnalysis {
+  overall_match_score: number
+  preset_questions_score: number
+  final_recommendation: Recommendation
+  overall_reasoning?: string
+  preset_reasoning?: string
+  fit_notes?: string
+  green_flags?: string[]
+  red_flags?: string[]
+}
+
+export interface CVProcessingResult {
+  id: string
+  applicant_id: string
+  job_id: string
+  cv_url: string
+  analysis: CVAnalysis
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
+  created_at: string
+  updated_at: string
+}
+
+// ============================================
+// ADDITIONAL JOB TYPES
+// ============================================
+
+export interface JobPosting extends Job {}
+
+export interface VacancyListItem {
+  id: string
+  company_id: string
+  position_title: string
+  location: string
+  status: JobStatus
+  applicant_count: number
+  is_favorite?: boolean
+  date_posted: string
+  closing_date?: string
+}
+
+export type VacancyFavoriteValue = 'YES' | 'NO' | 'MAYBE'
