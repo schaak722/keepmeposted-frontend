@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -65,20 +66,32 @@ const MOCK_APPLICANTS: Applicant[] = [
 ]
 
 export default function ApplicantsPage() {
-  const { activeCompanyId, activeCompany } = useAuth()
-
   const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
 
+  const { activeCompanyId, activeCompany } = useAuth()
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
-const scopedApplicants = useMemo(() => {
-  if (!activeCompanyId) return []
-  return scopedApplicants.filter((a) => a.company_id === activeCompanyId)
-}, [activeCompanyId])
+  const queryCompanyId = searchParams.get("companyId")
+  const effectiveCompanyId = queryCompanyId || activeCompanyId
 
-  const filteredApplicants = applicants.filter(applicant => 
+  const effectiveCompanyName = useMemo(() => {
+    if (queryCompanyId) {
+      const fromApplicants = applicants.find(a => a.company_id === queryCompanyId)?.company_name
+      return fromApplicants || `Company ${queryCompanyId}`
+    }
+    return activeCompany?.company_name || (effectiveCompanyId ? `Company ${effectiveCompanyId}` : "All companies")
+  }, [activeCompany?.company_name, applicants, effectiveCompanyId, queryCompanyId])
+
+  const scopedApplicants = useMemo(() => {
+    if (!effectiveCompanyId) return applicants
+    return applicants.filter(a => a.company_id === effectiveCompanyId)
+  }, [applicants, effectiveCompanyId])
+
+  const filteredApplicants = scopedApplicants.filter(applicant => 
     applicant.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     applicant.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     applicant.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -126,7 +139,24 @@ const scopedApplicants = useMemo(() => {
       {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Applicants</h1>
-        <p className="text-gray-600">View all applicants across all companies and jobs</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-gray-600">
+            {effectiveCompanyId ? (
+              <>Showing applicants for: <span className="font-medium">{effectiveCompanyName}</span></>
+            ) : (
+              <>View all applicants across all companies and jobs</>
+            )}
+          </p>
+          {queryCompanyId && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/applicants")}
+            >
+              Clear filter
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Controls */}
