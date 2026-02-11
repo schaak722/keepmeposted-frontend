@@ -99,8 +99,8 @@ export default function JobsPage() {
         })
       } else {
         const newJob: Job = {
-          id: String(jobs.length + 1),
           ...jobData as Job,
+          id: String(jobs.length + 1),
           applicant_count: 0,
           status: jobData.status || "DRAFT",
           date_posted: new Date().toISOString(),
