@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { JobModal } from "@/components/modals/job-modal"
 import type { Job, JobStatus } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
+import { useAuth } from "@/contexts/auth-context"
 
 // Mock data
 const MOCK_JOBS: Job[] = [
@@ -61,12 +62,20 @@ const MOCK_JOBS: Job[] = [
 ]
 
 export default function JobsPage() {
+  const { activeCompanyId, activeCompany } = useAuth()
+
   const [jobs, setJobs] = useState<Job[]>(MOCK_JOBS)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingJob, setEditingJob] = useState<Job | null>(null)
   const { toast } = useToast()
+
+
+const scopedJobs = useMemo(() => {
+  if (!activeCompanyId) return []
+  return scopedJobs.filter((job) => job.company_id === activeCompanyId)
+}, [activeCompanyId])
 
   const filteredJobs = jobs.filter(job => 
     job.position_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
