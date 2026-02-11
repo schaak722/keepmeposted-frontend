@@ -263,4 +263,20 @@ export interface PaginatedResponse<T> {
 
 export interface ApiError {
   message: string
-  errors?: Record<s
+  errors?: Record<string, string[]>
+  status_code: number
+}
+
+// ============================================
+// FORM STATES
+// ============================================
+
+export interface LoadingState {
+  isLoading: boolean
+  error?: string
+}
+
+export interface FormState<T> extends LoadingState {
+  data?: T
+  isDirty: boolean
+}
