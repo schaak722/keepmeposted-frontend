@@ -87,8 +87,8 @@ export default function CompaniesPage() {
       } else {
         // Create new company
         const newCompany: Company = {
-          id: String(companies.length + 1),
           ...companyData as Company,
+          id: String(companies.length + 1),
           job_count: 0,
           applicant_count: 0,
           created_at: new Date().toISOString(),
