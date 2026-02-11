@@ -302,7 +302,6 @@ export default function ClientApplicantsPage() {
       {selectedApplicant && (
         <ApplicantDetailsPanel
           applicant={selectedApplicant}
-          isOpen={!!selectedApplicant}
           onClose={() => setSelectedApplicant(null)}
         />
       )}
