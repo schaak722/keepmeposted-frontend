@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,9 +11,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import type { Job, JobCreate, EmploymentBasis, JobStatus } from "@/types"
 import { SALARY_BANDS, JOB_CATEGORIES } from "@/types"
+import { getStoredCompanies } from "@/lib/storage/company-store"
 
-// Mock companies for selection
-const MOCK_COMPANIES = [
+// Companies are stored client-side for now (localStorage) until backend is connected
+const FALLBACK_COMPANIES = [
   { id: "1", name: "Lovin Malta" },
   { id: "2", name: "Tech Solutions Ltd" }
 ]
@@ -49,6 +51,15 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+
+const [companies, setCompanies] = useState<{ id: string; name: string }[]>(FALLBACK_COMPANIES)
+
+useEffect(() => {
+  const stored = getStoredCompanies()
+  if (stored.length > 0) {
+    setCompanies(stored.map(c => ({ id: c.id, name: c.name })))
+  }
+}, [])
 
   useEffect(() => {
     if (job) {
@@ -168,7 +179,7 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
       const filteredQuestions = formData.preset_questions?.filter(q => q.trim() !== "") || []
       
       // Get company name
-      const company = MOCK_COMPANIES.find(c => c.id === formData.company_id)
+      const company = companies.find(c => c.id === formData.company_id)
 
       await onSave({
         ...formData,
@@ -199,16 +210,30 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
             <label className="block text-sm font-medium mb-2">
               Company <span className="text-red-500">*</span>
             </label>
-            <Select 
-              value={formData.company_id} 
+            {companies.length === 0 ? (
+  <div className="rounded-md border bg-muted/30 p-3 text-sm">
+    <div className="font-medium">No company profiles found</div>
+    <div className="text-muted-foreground mt-1">
+      You must create a Company Profile before creating a job.
+    </div>
+    <div className="mt-2">
+      <Button type="button" variant="outline" asChild>
+        <Link href="/companies/new">Create Company Profile</Link>
+      </Button>
+    </div>
+  </div>
+) : null}
+
+<Select 
+  value={formData.company_id} 
               onValueChange={(value) => setFormData({ ...formData, company_id: value })}
-              disabled={!!job} // Can't change company after creation
+              disabled={!!job || companies.length === 0} // Can't change company after creation
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select company" />
               </SelectTrigger>
               <SelectContent>
-                {MOCK_COMPANIES.map(company => (
+                {companies.map(company => (
                   <SelectItem key={company.id} value={company.id}>
                     {company.name}
                   </SelectItem>
