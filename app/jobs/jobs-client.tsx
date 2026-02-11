@@ -95,8 +95,8 @@ export default function JobsClient() {
       const name = MOCK_JOBS.find((j) => j.company_id === queryCompanyId)?.company_name
       return name ? `${name} (filter)` : `Company ${queryCompanyId} (filter)`
     }
-    return activeCompany?.name || "All companies"
-  }, [activeCompany?.name, queryCompanyId])
+    return activeCompany?.company_name || "All companies"
+  }, [activeCompany?.company_name, queryCompanyId])
 
   return (
     <div className="space-y-6">
