@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import type { Applicant, Recommendation } from "@/types"
+import type { Applicant } from "@/types"
+import { ApplicantStatus, Recommendation } from "@/types"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 
@@ -25,14 +26,14 @@ const MOCK_APPLICANTS: Applicant[] = [
     cv_url: "/uploads/sarah-johnson-cv.pdf",
     overall_match_score: 92,
     preset_questions_score: 88,
-    final_recommendation: "Strong Match" as Recommendation,
+    final_recommendation: Recommendation.STRONG_MATCH,
     current_employer: "Times of Malta",
     current_position: "Senior Journalist",
     years_experience: 8,
     technical_skills: ["SEO", "Content Strategy", "Adobe Creative Suite"],
     soft_skills: ["Communication", "Creativity"],
     languages: ["English", "Maltese"],
-    status: "NEW",
+    status: ApplicantStatus.NEW,
     applied_date: "2026-02-10",
     created_at: "2026-02-10T10:00:00Z",
     updated_at: "2026-02-10T10:00:00Z",
@@ -50,27 +51,27 @@ const MOCK_APPLICANTS: Applicant[] = [
     cv_url: "/uploads/mark-borg-cv.pdf",
     overall_match_score: 76,
     preset_questions_score: 72,
-    final_recommendation: "Possible Fit" as Recommendation,
+    final_recommendation: Recommendation.POSSIBLE_FIT,
     current_employer: "Independent",
     current_position: "Freelance Writer",
     years_experience: 5,
     technical_skills: ["Copywriting", "Social Media"],
     soft_skills: ["Adaptability", "Time Management"],
     languages: ["English", "Maltese"],
-    status: "SCREENING",
+    status: ApplicantStatus.SCREENING,
     applied_date: "2026-02-09",
     created_at: "2026-02-09T10:00:00Z",
     updated_at: "2026-02-09T10:00:00Z",
   },
 ]
 
-function badgeVariant(rec: Recommendation) {
+function badgeVariant(rec: Applicant["final_recommendation"]) {
   switch (rec) {
-    case "Strong Match":
+    case Recommendation.STRONG_MATCH:
       return "default"
-    case "Possible Fit":
+    case Recommendation.POSSIBLE_FIT:
       return "secondary"
-    case "Not Recommended":
+    case Recommendation.NOT_RECOMMENDED:
       return "destructive"
     default:
       return "outline"
@@ -96,7 +97,12 @@ export default function ApplicantsClient() {
     if (!q) return scoped
     return scoped.filter((a) => {
       const full = `${a.first_name} ${a.last_name}`.toLowerCase()
-      return full.includes(q) || (a.position_title || "").toLowerCase().includes(q) || (a.location || "").toLowerCase().includes(q)
+      return (
+        full.includes(q) ||
+        (a.position_title || "").toLowerCase().includes(q) ||
+        (a.location || "").toLowerCase().includes(q) ||
+        (a.company_name || "").toLowerCase().includes(q)
+      )
     })
   }, [scoped, searchQuery])
 
