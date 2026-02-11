@@ -112,7 +112,7 @@ export default function ApplicantsClient() {
         <div>
           <h1 className="text-2xl font-semibold">Applicants</h1>
           <p className="text-sm text-muted-foreground">
-            Showing applicants for: {activeCompany?.name || "All companies"}
+            Showing applicants for: {activeCompany?.company_name || "All companies"}
           </p>
         </div>
 
