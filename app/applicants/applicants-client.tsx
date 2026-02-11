@@ -57,7 +57,7 @@ const MOCK_APPLICANTS: Applicant[] = [
     technical_skills: ["Copywriting", "Social Media"],
     soft_skills: ["Adaptability", "Time Management"],
     languages: ["English", "Maltese"],
-    status: "REVIEWED",
+    status: "SCREENING",
     applied_date: "2026-02-09",
     created_at: "2026-02-09T10:00:00Z",
     updated_at: "2026-02-09T10:00:00Z",
