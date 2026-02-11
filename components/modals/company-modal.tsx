@@ -146,7 +146,7 @@ export function CompanyModal({ isOpen, onClose, onSave, company }: CompanyModalP
         // TODO: Upload logo to server
         // const uploadResponse = await uploadLogo(company?.id, logoFile)
         // logo_url = uploadResponse.logo_url
-        logo_url = logoPreview // For now, use preview
+        logo_url = logoPreview || undefined
       }
 
       await onSave({
