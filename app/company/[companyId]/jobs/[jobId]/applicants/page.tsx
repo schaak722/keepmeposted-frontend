@@ -1,174 +1,184 @@
 "use client"
 
 import { useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { TableSkeleton } from "@/components/ui/skeleton"
 import { ApplicantDetailsPanel } from "@/components/applicant-details/applicant-details-panel"
+import type { Applicant, Recommendation } from "@/types"
 
-// Mock applicants data with full CV details
-const MOCK_APPLICANTS = [
+// Mock data - enhanced from Phase 5
+const MOCK_APPLICANTS: Applicant[] = [
   {
     id: "1",
-    name: "Sarah Johnson",
-    email: "sarah.johnson@email.com",
+    company_id: "1",
+    job_id: "1",
+    company_name: "Lovin Malta",
+    position_title: "Senior Content Writer",
+    first_name: "Sarah",
+    last_name: "Johnson",
+    email: "sarah.j@email.com",
     contact_number: "+356 2123 4567",
-    location: "Malta",
+    location: "Valletta, Malta",
+    cv_url: "/uploads/sarah-johnson-cv.pdf",
     overall_match_score: 92,
-    overall_reasoning: "Excellent fit with 8+ years of progressive HR experience in tech companies. Demonstrates strong leadership and operational excellence. Education and certifications align perfectly with role requirements.",
     preset_questions_score: 88,
-    preset_reasoning: "Meets all critical requirements: CIPD qualified, extensive HRIS experience (Workday, BambooHR), proven track record managing teams of 5+, and solid employment law knowledge. Minor gap in specific industry experience.",
-    final_recommendation: "Strong Match",
-    current_employer: "Tech Solutions Ltd",
-    current_position: "HR Manager",
+    final_recommendation: "Strong Match" as Recommendation,
+    current_employer: "Times of Malta",
+    current_position: "Senior Journalist",
     years_experience: 8,
-    average_duration: 3.2,
-    applied_date: "2026-02-01",
-    is_starred: false,
-    technical_skills: ["Workday", "BambooHR", "ATS Systems", "HRIS Management", "Data Analytics", "Payroll Systems"],
-    soft_skills: ["Leadership", "Communication", "Conflict Resolution", "Strategic Planning", "Team Building"],
-    languages: ["English (Native)", "Maltese (Fluent)", "Italian (Conversational)"],
-    relevant_experience: "8 years in HR roles with progressive responsibility. Managed full employee lifecycle for 200+ employees. Led recruitment drives hiring 50+ positions annually. Implemented new HRIS system reducing admin time by 40%. Managed employee relations cases and disciplinary procedures.",
-    qualifications: "BA in Human Resources Management (University of Malta, 2016), CIPD Level 5 Diploma (2018), Certified Workday Professional (2022)",
+    average_duration: 2.5,
+    technical_skills: ["SEO", "Content Strategy", "Adobe Creative Suite", "CMS Management"],
+    soft_skills: ["Communication", "Creativity", "Time Management"],
+    languages: ["English (Native)", "Maltese (Fluent)", "Italian (Intermediate)"],
+    relevant_experience: "8 years in journalism and content creation, specializing in digital media",
+    qualifications: "BA in Journalism, University of Malta",
     green_flags: [
-      "Strong cultural fit with tech industry experience",
-      "Proven track record of process improvement and efficiency gains",
-      "CIPD qualified with continued professional development",
-      "Experience managing teams and complex employee relations",
-      "Local candidate - no relocation required"
+      "Strong SEO expertise demonstrated in previous roles",
+      "Proven track record of viral content creation",
+      "Experience managing editorial teams"
     ],
-    red_flags: [],
-    fit_notes: "Sarah is an exceptional candidate who brings exactly what we're looking for. Her combination of technical HR knowledge (HRIS, compliance) and soft skills (leadership, communication) makes her ideal for this role.\n\nKey strengths:\n- Extensive experience with Workday and BambooHR (our current systems)\n- Proven ability to scale HR operations (managed growth from 100 to 200+ employees)\n- Strong track record of process improvement\n- CIPD qualified showing commitment to professional standards\n- Based in Malta - immediate availability\n\nThe only minor consideration is that her experience is primarily in tech/software rather than media, but her transferable skills are highly relevant."
+    red_flags: [
+      "May expect higher salary than budgeted"
+    ],
+    overall_reasoning: "Excellent match with extensive relevant experience in digital media and proven SEO skills.",
+    preset_reasoning: "Strong answers to screening questions, particularly regarding SEO strategy and portfolio samples.",
+    fit_notes: "Would be an excellent addition to the editorial team. Experience level matches senior requirements.",
+    status: "NEW",
+    applied_date: "2024-02-05T10:00:00Z",
+    is_starred: false,
+    created_at: "2024-02-05T10:00:00Z",
+    updated_at: "2024-02-05T10:00:00Z"
   },
   {
     id: "2",
-    name: "Michael Chen",
-    email: "michael.chen@email.com",
-    contact_number: "+65 9123 4567",
-    location: "Singapore",
+    company_id: "1",
+    job_id: "1",
+    first_name: "Michael",
+    last_name: "Chen",
+    email: "m.chen@email.com",
+    contact_number: "+356 7912 3456",
+    location: "Sliema, Malta",
+    cv_url: "/uploads/michael-chen-cv.pdf",
     overall_match_score: 78,
-    overall_reasoning: "Solid mid-level HR professional with good foundation but lacks some senior-level experience. Strong technical skills but limited leadership experience. Would benefit from mentorship in strategic HR functions.",
     preset_questions_score: 82,
-    preset_reasoning: "Meets most requirements with 5 years experience and HRIS knowledge. However, limited team management experience (managed 2 direct reports vs 5+ required) and no formal CIPD or equivalent certification.",
-    final_recommendation: "Possible Fit",
-    current_employer: "Global Corp",
-    current_position: "HR Coordinator",
-    years_experience: 5,
-    average_duration: 2.5,
-    applied_date: "2026-02-03",
-    is_starred: true,
-    technical_skills: ["SAP SuccessFactors", "Applicant Tracking", "HR Analytics", "MS Office Suite"],
-    soft_skills: ["Detail-oriented", "Communication", "Problem-solving", "Time Management"],
-    languages: ["English (Fluent)", "Mandarin (Native)", "Malay (Basic)"],
-    relevant_experience: "5 years in HR coordination roles. Supported recruitment for 30+ positions annually. Managed onboarding process for new hires. Maintained employee records in HRIS. Assisted with performance review cycles and employee queries.",
-    qualifications: "BA in Business Administration (National University of Singapore, 2019), HR Management Certificate (2020)",
+    final_recommendation: "Possible Fit" as Recommendation,
+    current_employer: "Independent Freelancer",
+    current_position: "Freelance Writer",
+    years_experience: 4,
+    average_duration: 1.5,
+    technical_skills: ["Content Writing", "Social Media", "Basic SEO"],
+    soft_skills: ["Adaptability", "Creativity"],
+    languages: ["English (Native)", "Mandarin (Native)"],
+    relevant_experience: "4 years freelance writing with focus on lifestyle and travel content",
+    qualifications: "BA in English Literature, University of London",
     green_flags: [
-      "Strong technical proficiency with HRIS systems",
-      "Attention to detail and process-oriented approach",
-      "Quick learner with growth mindset",
-      "Multilingual capabilities"
+      "Strong writing samples provided",
+      "Flexible and adaptable work style"
     ],
     red_flags: [
-      "Limited leadership/management experience",
-      "No CIPD or equivalent professional certification",
-      "Would require relocation from Singapore",
-      "Less strategic/senior-level experience than ideal"
+      "Limited SEO experience compared to requirements",
+      "No team management experience"
     ],
-    fit_notes: "Michael is a capable HR professional with solid fundamentals, but may be slightly junior for this role. His technical skills are strong, and he shows potential for growth.\n\nConsiderations:\n- Currently in coordinator-level role vs manager-level position\n- Limited direct management experience\n- Would need visa/relocation support from Singapore\n- May require additional training on employment law and strategic HR\n\nCould be a good fit if we're open to developing talent and providing mentorship, but might struggle with the immediate demands of the role."
+    overall_reasoning: "Good writer but lacks some technical SEO skills required for senior role.",
+    preset_reasoning: "Adequate answers but showed gaps in advanced SEO knowledge.",
+    fit_notes: "Could be considered if willing to take more junior role or with additional training.",
+    status: "SCREENING",
+    applied_date: "2024-02-03T10:00:00Z",
+    is_starred: true,
+    created_at: "2024-02-03T10:00:00Z",
+    updated_at: "2024-02-03T10:00:00Z"
   },
   {
     id: "3",
-    name: "Emma Williams",
+    company_id: "1",
+    job_id: "1",
+    first_name: "Emma",
+    last_name: "Williams",
     email: "emma.w@email.com",
-    contact_number: "+44 7700 900123",
-    location: "UK",
+    location: "St. Julian's, Malta",
+    cv_url: "/uploads/emma-williams-cv.pdf",
     overall_match_score: 95,
-    overall_reasoning: "Outstanding candidate who exceeds all requirements. 10+ years of senior HR experience with proven track record in operational excellence and strategic people management. Perfect blend of skills, experience, and cultural fit.",
     preset_questions_score: 94,
-    preset_reasoning: "Exceeds all preset requirements comprehensively: CIPD Level 7 qualified, extensive experience with multiple HRIS platforms, managed large teams (15+ direct/indirect reports), expert-level employment law knowledge, and proven change management capabilities.",
-    final_recommendation: "Strong Match",
-    current_employer: "Innovation Hub",
-    current_position: "People Operations Lead",
+    final_recommendation: "Strong Match" as Recommendation,
+    current_employer: "MaltaToday",
+    current_position: "Head of Digital Content",
     years_experience: 10,
-    average_duration: 4.1,
-    applied_date: "2026-02-02",
-    is_starred: false,
-    technical_skills: ["Workday", "SAP", "PeopleSoft", "Advanced Excel", "Power BI", "HRIS Implementation", "Process Automation"],
-    soft_skills: ["Strategic Leadership", "Change Management", "Stakeholder Management", "Executive Coaching", "Organizational Development"],
-    languages: ["English (Native)", "French (Fluent)", "Spanish (Intermediate)"],
-    relevant_experience: "10 years in senior HR leadership roles. Led HR operations for organizations of 300-500 employees. Spearheaded digital transformation initiatives including HRIS implementations. Managed M&A integration affecting 200+ employees. Developed and implemented HR strategy aligned with business goals. Built and led teams of 15+ HR professionals.",
-    qualifications: "MSc in Human Resource Management (LSE, 2014), CIPD Level 7 (Advanced Diploma), Certified Change Management Professional (2019), Employment Law Specialist Certificate (2020)",
+    average_duration: 3.5,
+    technical_skills: ["SEO", "Content Strategy", "Team Leadership", "Analytics", "CMS"],
+    soft_skills: ["Leadership", "Strategic Thinking", "Communication"],
+    languages: ["English (Native)", "Maltese (Fluent)"],
+    relevant_experience: "10 years in digital journalism with 5 years in leadership roles",
+    qualifications: "MA in Digital Media, University of Malta",
     green_flags: [
-      "Exceptional qualifications - CIPD Level 7 and MSc from top university",
-      "Extensive senior leadership experience managing large HR teams",
-      "Proven track record in digital transformation and process improvement",
-      "Experience with M&A and organizational change",
-      "Strong strategic and operational capabilities",
-      "Multiple HRIS implementations completed successfully"
+      "Exceptional SEO and content strategy expertise",
+      "Proven leadership and team management skills",
+      "Strong local market knowledge"
+    ],
+    red_flags: [],
+    overall_reasoning: "Outstanding candidate with all required skills and local market expertise.",
+    preset_reasoning: "Exemplary answers demonstrating deep SEO knowledge and strategic thinking.",
+    fit_notes: "Top candidate - immediate hire recommended.",
+    status: "NEW",
+    applied_date: "2024-02-06T10:00:00Z",
+    is_starred: false,
+    created_at: "2024-02-06T10:00:00Z",
+    updated_at: "2024-02-06T10:00:00Z"
+  },
+  {
+    id: "4",
+    company_id: "1",
+    job_id: "1",
+    first_name: "James",
+    last_name: "Brown",
+    email: "j.brown@email.com",
+    location: "Msida, Malta",
+    cv_url: "/uploads/james-brown-cv.pdf",
+    overall_match_score: 58,
+    preset_questions_score: 62,
+    final_recommendation: "Not Recommended" as Recommendation,
+    current_employer: "Local Blog",
+    current_position: "Content Contributor",
+    years_experience: 2,
+    technical_skills: ["Basic Writing", "Social Media"],
+    soft_skills: ["Enthusiasm", "Quick Learner"],
+    languages: ["English (Native)"],
+    relevant_experience: "2 years part-time blogging",
+    qualifications: "Ongoing BA in Communications",
+    green_flags: [
+      "Enthusiastic and eager to learn"
     ],
     red_flags: [
-      "May be overqualified for the position",
-      "Currently in UK - would need relocation package",
-      "Salary expectations likely at upper end of budget"
+      "Insufficient experience for senior role",
+      "No SEO knowledge demonstrated",
+      "Incomplete degree"
     ],
-    fit_notes: "Emma is an exceptional candidate who brings senior-level expertise that could transform our HR function. She represents the 'gold standard' for this role.\n\nKey differentiators:\n- CIPD Level 7 (most senior professional qualification)\n- Led multiple HRIS implementations from selection through deployment\n- Experience managing both strategic and operational HR\n- Proven ability to drive organizational change and digital transformation\n- Strong stakeholder management at C-level\n\nMain consideration is ensuring the role provides sufficient challenge and growth opportunity for someone of her caliber. Her experience level might be beyond what we need, but if budget allows, she could significantly elevate our entire HR operation."
+    overall_reasoning: "Not qualified for senior position. Lacks required experience and technical skills.",
+    preset_reasoning: "Weak answers showing lack of SEO understanding.",
+    fit_notes: "Not suitable for this role.",
+    status: "NEW",
+    applied_date: "2024-02-04T10:00:00Z",
+    is_starred: false,
+    created_at: "2024-02-04T10:00:00Z",
+    updated_at: "2024-02-04T10:00:00Z"
   }
 ]
 
-type FilterType = "all" | "strong" | "possible" | "not_recommended" | "starred"
-
-export default function ApplicantsPage() {
+export default function ClientApplicantsPage() {
   const params = useParams()
-  const router = useRouter()
-  const companyId = params.companyId as string
   const jobId = params.jobId as string
 
-  const [search, setSearch] = useState("")
-  const [filter, setFilter] = useState<FilterType>("all")
-  const [applicants, setApplicants] = useState(MOCK_APPLICANTS)
-  const [selectedApplicant, setSelectedApplicant] = useState<any>(null)
+  const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS)
+  const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null)
 
-  // Filter applicants based on search and filter tabs
-  const filteredApplicants = applicants.filter(applicant => {
-    const matchesSearch = applicant.name.toLowerCase().includes(search.toLowerCase())
-    
-    let matchesFilter = true
-    if (filter === "strong") {
-      matchesFilter = applicant.final_recommendation === "Strong Match"
-    } else if (filter === "possible") {
-      matchesFilter = applicant.final_recommendation === "Possible Fit"
-    } else if (filter === "not_recommended") {
-      matchesFilter = applicant.final_recommendation === "Not Recommended"
-    } else if (filter === "starred") {
-      matchesFilter = applicant.is_starred
-    }
-    
-    return matchesSearch && matchesFilter
-  })
-
-  const handleApplicantClick = (applicantId: string) => {
-    const applicant = applicants.find(a => a.id === applicantId)
-    setSelectedApplicant(applicant)
-  }
-
-  const toggleStar = (applicantId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    setApplicants(prev => prev.map(app => 
-      app.id === applicantId ? { ...app, is_starred: !app.is_starred } : app
-    ))
-  }
-
-  const getRecommendationBadge = (recommendation: string) => {
-    if (recommendation === "Strong Match") {
-      return <Badge variant="success">Strong Match</Badge>
-    } else if (recommendation === "Possible Fit") {
-      return <Badge variant="warning">Possible Fit</Badge>
-    } else {
-      return <Badge variant="error">Not Recommended</Badge>
-    }
-  }
+  const filteredApplicants = applicants.filter(applicant => 
+    applicant.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    applicant.last_name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return "text-green-600 font-semibold"
@@ -176,192 +186,125 @@ export default function ApplicantsPage() {
     return "text-red-600 font-semibold"
   }
 
-  // Count for each filter
-  const counts = {
-    all: applicants.length,
-    strong: applicants.filter(a => a.final_recommendation === "Strong Match").length,
-    possible: applicants.filter(a => a.final_recommendation === "Possible Fit").length,
-    not_recommended: applicants.filter(a => a.final_recommendation === "Not Recommended").length,
-    starred: applicants.filter(a => a.is_starred).length
+  const getRecommendationBadge = (recommendation: Recommendation) => {
+    const variants: Record<Recommendation, "success" | "warning" | "error"> = {
+      "Strong Match": "success",
+      "Possible Fit": "warning",
+      "Not Recommended": "error"
+    }
+    return <Badge variant={variants[recommendation]}>{recommendation}</Badge>
   }
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto py-8 px-4">
-          {/* Page Header */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => router.push(`/company/${companyId}/jobs`)}
-              >
-                ← Back to Jobs
-              </Button>
-            </div>
-            <h1 className="text-3xl font-bold mb-4">HR Operations Manager</h1>
-            
-            {/* Search and Filters */}
-            <div className="flex flex-col gap-4">
-              {/* Search */}
-              <Input
-                placeholder="Search for applicant"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="max-w-md"
-              />
-              
-              {/* Filter Tabs */}
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => setFilter("all")}
-                  className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                    filter === "all"
-                      ? "bg-brand-blue text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  All ({counts.all})
-                </button>
-                <button
-                  onClick={() => setFilter("strong")}
-                  className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                    filter === "strong"
-                      ? "bg-brand-blue text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  Strong Fit ({counts.strong})
-                </button>
-                <button
-                  onClick={() => setFilter("possible")}
-                  className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                    filter === "possible"
-                      ? "bg-brand-blue text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  Possible Fit ({counts.possible})
-                </button>
-                <button
-                  onClick={() => setFilter("not_recommended")}
-                  className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                    filter === "not_recommended"
-                      ? "bg-brand-blue text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  Not Recommended ({counts.not_recommended})
-                </button>
-                <button
-                  onClick={() => setFilter("starred")}
-                  className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                    filter === "starred"
-                      ? "bg-brand-blue text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  ⭐ Starred ({counts.starred})
-                </button>
-              </div>
+      <div className="p-6 max-w-7xl mx-auto">
+        {/* Page Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Applicants</h1>
+          <p className="text-gray-600">Review applicants for this position</p>
+        </div>
+
+        {/* Controls */}
+        <div className="flex justify-between items-center mb-6 gap-4">
+          <Input
+            placeholder="Search applicants..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-md"
+          />
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm text-gray-600">Total</div>
+            <div className="text-2xl font-bold">{applicants.length}</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm text-gray-600">Strong Matches</div>
+            <div className="text-2xl font-bold text-green-600">
+              {applicants.filter(a => a.final_recommendation === "Strong Match").length}
             </div>
           </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm text-gray-600">Possible Fits</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {applicants.filter(a => a.final_recommendation === "Possible Fit").length}
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm text-gray-600">Not Recommended</div>
+            <div className="text-2xl font-bold text-red-600">
+              {applicants.filter(a => a.final_recommendation === "Not Recommended").length}
+            </div>
+          </div>
+        </div>
 
-          {/* Applicants Table */}
-          <div className="bg-white rounded-lg shadow">
+        {/* Table */}
+        {isLoading ? (
+          <TableSkeleton rows={5} />
+        ) : (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]"></TableHead>
-                  <TableHead>Applicant</TableHead>
+                  <TableHead>Applicant Name</TableHead>
                   <TableHead>Location</TableHead>
-                  <TableHead>Overall Score</TableHead>
-                  <TableHead>Preset Q Score</TableHead>
+                  <TableHead className="text-center">Overall Score</TableHead>
+                  <TableHead className="text-center">PreQ Score</TableHead>
                   <TableHead>Recommendation</TableHead>
-                  <TableHead>Current Role</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredApplicants.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                      No applicants found
+                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                      {searchQuery ? "No applicants found matching your search" : "No applicants yet"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredApplicants.map((applicant) => (
-                    <TableRow
+                  filteredApplicants.map(applicant => (
+                    <TableRow 
                       key={applicant.id}
-                      onClick={() => handleApplicantClick(applicant.id)}
+                      onClick={() => setSelectedApplicant(applicant)}
                       className="cursor-pointer hover:bg-gray-50"
                     >
                       <TableCell>
-                        <button
-                          onClick={(e) => toggleStar(applicant.id, e)}
-                          className="text-2xl hover:scale-110 transition-transform"
-                        >
-                          {applicant.is_starred ? "⭐" : "☆"}
-                        </button>
-                      </TableCell>
-                      <TableCell>
                         <div>
-                          <div className="font-medium">{applicant.name}</div>
+                          <div className="font-medium">
+                            {applicant.first_name} {applicant.last_name}
+                          </div>
                           <div className="text-sm text-gray-500">{applicant.email}</div>
                         </div>
                       </TableCell>
-                      <TableCell>{applicant.location}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-gray-600">{applicant.location}</TableCell>
+                      <TableCell className="text-center">
                         <span className={getScoreColor(applicant.overall_match_score)}>
                           {applicant.overall_match_score}%
                         </span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         <span className={getScoreColor(applicant.preset_questions_score)}>
                           {applicant.preset_questions_score}%
                         </span>
                       </TableCell>
-                      <TableCell>
-                        {getRecommendationBadge(applicant.final_recommendation)}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="text-sm">{applicant.current_position}</div>
-                          <div className="text-xs text-gray-500">{applicant.current_employer}</div>
-                        </div>
-                      </TableCell>
+                      <TableCell>{getRecommendationBadge(applicant.final_recommendation)}</TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
             </Table>
           </div>
-
-          {/* Info Banner */}
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> Using mock applicant data with full CV analysis. Click any applicant to view detailed profile.
-              Click ⭐ to star/unstar applicants.
-            </p>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Applicant Details Panel */}
+      {/* Applicant Details Panel - From Phase 5 */}
       {selectedApplicant && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={() => setSelectedApplicant(null)}
-          />
-          
-          {/* Details Panel */}
-          <ApplicantDetailsPanel
-            applicant={selectedApplicant}
-            onClose={() => setSelectedApplicant(null)}
-          />
-        </>
+        <ApplicantDetailsPanel
+          applicant={selectedApplicant}
+          isOpen={!!selectedApplicant}
+          onClose={() => setSelectedApplicant(null)}
+        />
       )}
     </>
   )

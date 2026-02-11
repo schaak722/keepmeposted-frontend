@@ -1,448 +1,459 @@
-# Phase 6B: Internal Ops Platform
+# Phase 6C: Client Experience (Final Phase)
 
 ## 🎯 Overview
 
-**Phase 6B** builds the core internal operations management pages for the KeepMePosted platform. This phase enables internal ops and admin users to manage companies, jobs, applicants, and users across the entire platform.
+**Phase 6C** is the final phase that enhances the client-facing user experience with improved job management and applicant viewing features. This completes the full-stack transformation of the KeepMePosted platform.
 
 ## 📦 What's Included
 
-### 1. **Companies Management Page** (`app/companies/page.tsx`)
-- Full company listing with search
-- Create/Edit company modal
-- Logo upload functionality
-- Company contact information management
-- Job and applicant counts per company
+### 1. **Enhanced Client Jobs Page** (`app/company/[companyId]/jobs/page.tsx`)
+- Sortable columns (Date Posted, Closing Date)
+- 3-dots actions menu for each job
+- Job Details modal integration
+- Clean, professional interface
+- Direct navigation to applicants
 
-### 2. **Company Modal** (`components/modals/company-modal.tsx`)
-- Create/Edit company profiles
-- Logo file upload with validation
-- Industry selection
-- Contact person details
-- Form validation
+### 2. **Job Details Modal** (`components/modals/job-details-modal.tsx`)
+- Full job information display
+- Employment basis badges
+- Salary band information
+- Job categories
+- Screening questions
+- Job and company descriptions
+- Quick "View Applicants" button
 
-### 3. **Global Jobs Page** (`app/jobs/page.tsx`)
-- All jobs across all companies
-- Create/Edit job modal
-- Search and filter jobs
-- Job status management
-- Applicant counts
-
-### 4. **Job Modal** (`components/modals/job-modal.tsx`)
-- Company selection
-- Multi-select employment basis (Full-Time, Part-Time, etc.)
-- Salary band dropdown
-- Multi-select job categories
-- Up to 3 preset questions
-- Job description and company about
-- Status and closing date
-
-### 5. **Global Applicants Page** (`app/applicants/page.tsx`)
-- All applicants across platform
-- CV download functionality
-- Search by name, company, position
-- Overall scores and recommendations
+### 3. **Updated Applicants Page** (`app/company/[companyId]/jobs/[jobId]/applicants/page.tsx`)
+- Simplified table with essential columns:
+  - Applicant Name
+  - Location
+  - Overall Score
+  - PreQ Score (Preset Questions Score)
+  - Recommendation
+- Retains existing Applicant Details Panel from Phase 5
 - Stats dashboard
-
-### 6. **User Management Page** (`app/users/page.tsx`)
-- User listing (Admin only)
-- Role badges
-- Company access display
-- User stats
-- Placeholder for future edit/invite features
+- Search functionality
 
 ---
 
-## 🚀 How to Integrate Phase 6B
+## 🚀 How to Integrate Phase 6C
 
 ### Step 1: Upload to GitHub
 
-1. **Download and extract** `phase6b-internal-ops.zip`
-2. **Upload all folders** to GitHub:
-   - `app/companies/`
-   - `app/jobs/`
-   - `app/applicants/`
-   - `app/users/`
-   - `components/modals/`
+1. **Download and extract** `phase6c-client-experience.zip`
+2. **Upload folders** to GitHub:
+   - `app/company/[companyId]/jobs/` (replaces Phase 3 version)
+   - `app/company/[companyId]/jobs/[jobId]/applicants/` (replaces Phase 4 version)
+   - `components/modals/job-details-modal.tsx` (new)
 3. **Commit changes**
 4. **Wait** for Koyeb to deploy
 
-### Step 2: Test the Pages
+### Step 2: Test the Features
 
-After deployment, navigate to each page:
+After deployment:
 
-**Companies Page** - `/companies`
-- ✅ IT Admin and Internal Ops can access
-- ✅ Client users cannot access (blocked by AppShell)
-- ✅ Click "Add Company" to test modal
-- ✅ Click company name to edit
-- ✅ Upload logo (file validation works)
+**Test Jobs Page:**
+- Navigate to `/company/{companyId}/jobs` (as client user)
+- Click column headers to sort
+- Click 3-dots menu on any job
+- Select "View Job Details" → modal opens
+- Select "View Applicants" → navigates to applicants
 
-**Jobs Page** - `/jobs`
-- ✅ IT Admin and Internal Ops can access
-- ✅ Click "Create Job" to test modal
-- ✅ Multi-select basis checkboxes work
-- ✅ Salary band dropdown populates
-- ✅ Categories multi-select works
-- ✅ Up to 3 preset questions
+**Test Job Details Modal:**
+- Verify all job information displays
+- Check employment basis badges
+- Verify salary band shows correctly
+- Click "View Applicants" button
 
-**Applicants Page** - `/applicants`
-- ✅ IT Admin and Internal Ops can access
-- ✅ Stats cards show counts
-- ✅ Click "Download CV" triggers download
-
-**User Management** - `/users`
-- ✅ IT Admin ONLY can access
-- ✅ Internal Ops blocked (403 route check)
-- ✅ Shows user listing with roles
-- ✅ Displays company memberships
+**Test Updated Applicants Page:**
+- Navigate to applicants for a job
+- Verify 5 columns show correctly
+- Click any row → details panel slides in
+- Verify panel navigation works
+- Test search functionality
 
 ---
 
-## 🎨 Key Features
+## ✨ Key Features Delivered
 
-### Companies Management
+### Enhanced Jobs Page
 
-**Table Columns:**
-- Logo (thumbnail or initial)
-- Company Name (clickable to edit)
-- Ref ID (badge)
-- Industry
-- Job Count
-- Applicant Count
-- Contact Person
-- Edit button
+**New Features:**
+- ✅ **Sortable Columns**
+  - Click "Date Posted" header to sort ascending/descending
+  - Click "Closing Date" header to sort
+  - Visual indicator (↑↓) shows current sort
+  
+- ✅ **3-Dots Actions Menu**
+  - "View Job Details" → Opens full job info modal
+  - "View Applicants" → Navigates to applicants page
+  
+- ✅ **Clickable Applicant Counts**
+  - Click number to go directly to applicants
 
-**Create/Edit Modal:**
-- Logo upload (PNG, JPG, WEBP, max 5MB)
-- Ref ID (required, unique)
-- Company Name (required)
-- Industry dropdown (required)
-- Website URL
-- Company Description
-- Contact Person Name
-- Contact Person Position
-- Contact Person Email (validated)
+**Improved UX:**
+- Cleaner interface
+- Professional dropdown menus
+- Responsive design
+- Fast navigation
 
-### Jobs Management
+### Job Details Modal
 
-**Table Columns:**
+**Information Displayed:**
 - Job ID
-- Company (logo + name)
-- Position Title
-- Date Posted
-- Closing Date
-- Applicant Count
-- Status (Draft/Open/Closed)
-- Edit button
+- Position title with status badge
+- Location and seniority
+- Date posted and closing date
+- Employment basis (badges)
+- Salary band (EUR)
+- Categories (badges)
+- Applicant count
+- Full job description
+- About the company
+- Industry
+- Screening questions (if any)
 
-**Create/Edit Modal:**
-- Company selection (dropdown)
-- Position Title
-- Employment Basis (multi-select checkboxes)
-  - Full-Time
-  - Part-Time
-  - Freelance
-  - Hybrid
-  - Temporary
-- Location
-- Seniority
-- Salary Band (dropdown from predefined EUR bands)
-- Job Categories (multi-select checkboxes)
-- Job Description (textarea)
-- About the Company (textarea)
-- Preset Questions (3 optional text inputs)
-- Closing Date (date picker)
-- Status (Draft/Open/Closed)
+**Actions:**
+- Close button
+- View Applicants button (with count)
 
-### Applicants Management
+### Updated Applicants Page
 
-**Table Columns:**
-- Name (with email below)
-- Company Applied For
-- Position Applied For
-- Date Applied
-- Overall Score (color-coded)
-- Recommendation badge
-- Download CV button
+**Table Columns (Simplified):**
+1. **Applicant Name** - Name + email below
+2. **Location** - City, Country
+3. **Overall Score** - Color-coded percentage
+4. **PreQ Score** - Preset Questions score
+5. **Recommendation** - Badge (Strong Match/Possible Fit/Not Recommended)
 
-**Stats Dashboard:**
-- Total Applicants
-- Strong Matches (green)
-- Possible Fits (yellow)
-- Not Recommended (red)
+**Removed Columns (from Phase 4):**
+- Star/unstar functionality (cleaner interface)
+- Current Role (available in details panel)
 
-### User Management
-
-**Table Columns:**
-- Full Name
-- Email
-- Role (badge: IT Admin/Internal Ops/Client)
-- Company Access (badges for each company)
-- Edit button (placeholder)
-
-**Stats:**
-- Total Users
-- Internal Staff
-- Client Users
+**Retained Features:**
+- Stats dashboard at top
+- Search functionality
+- Click row to open details panel
+- Full Applicant Details Panel from Phase 5
 
 ---
 
-## 🔄 Current State: Mock Data
+## 🎨 UI/UX Improvements
 
-All pages currently use **mock data**. Here's what needs backend integration:
+### Sorting
 
-### Companies Page
-```typescript
-// Replace MOCK_COMPANIES with:
-const { data: companies } = await apiClient.get("/companies")
-```
+**Visual Feedback:**
+- Unsorted column: `↕` icon
+- Sorted ascending: `↑` icon  
+- Sorted descending: `↓` icon
+- Active column highlighted on hover
 
-### Jobs Page
-```typescript
-// Replace MOCK_JOBS with:
-const { data: jobs } = await apiClient.get("/jobs") // Platform-wide jobs
-```
+**Default Sort:**
+- Date Posted (newest first)
 
-### Applicants Page
-```typescript
-// Replace MOCK_APPLICANTS with:
-const { data: applicants } = await apiClient.get("/applicants") // Platform-wide
-```
+### 3-Dots Menu
 
-### User Management
-```typescript
-// Replace MOCK_USERS with:
-const { data: users } = await apiClient.get("/users") // Admin only
-```
+**Dropdown Design:**
+- Clean dropdown
+- Right-aligned to table edge
+- Two clear options
+- Hover states
 
----
+### Job Details Modal
 
-## 🔐 Access Control
+**Layout:**
+- Large modal (3xl width)
+- Scrollable content
+- Organized sections
+- Professional typography
+- Brand color accents
 
-Phase 6B pages automatically enforce role-based access via the AppShell:
+### Applicants Table
 
-| Page | IT Admin | Internal Ops | Client |
-|------|----------|--------------|--------|
-| `/companies` | ✅ | ✅ | ❌ |
-| `/jobs` | ✅ | ✅ | ❌ |
-| `/applicants` | ✅ | ✅ | ❌ |
-| `/users` | ✅ | ❌ | ❌ |
-
-Users attempting to access restricted pages will:
-1. Not see the route in navigation (sidebar hides it)
-2. Be blocked by `canAccessRoute()` check if they manually navigate
+**Simplified Design:**
+- 5 focused columns
+- Color-coded scores
+- Clear recommendation badges
+- Row hover effect
+- Click-to-view details
 
 ---
 
-## 📋 Backend API Requirements
+## 🔄 What Changed from Phase 3-5
 
-Phase 6B expects these endpoints to exist:
+### Jobs Page (Phase 3 → Phase 6C)
 
-### Companies
-```
-GET    /companies
-POST   /companies
-PUT    /companies/:id
-POST   /companies/:id/logo (multipart/form-data)
-```
+**Added:**
+- Column sorting
+- 3-dots actions menu
+- Job Details modal
 
-### Jobs
-```
-GET    /jobs (platform-wide)
-POST   /companies/:companyId/jobs
-PUT    /companies/:companyId/jobs/:jobId
-```
+**Kept:**
+- Search functionality
+- Status badges
+- Basic table layout
 
-### Applicants
-```
-GET    /applicants (platform-wide)
-GET    /companies/:companyId/applicants/:applicantId/cv/download
-```
+### Applicants Page (Phase 4 → Phase 6C)
 
-### Users
-```
-GET    /users (admin only)
-PUT    /users/:userId (admin only)
-POST   /users/invite (admin only, future)
-```
+**Changed:**
+- **Removed**: Star column
+- **Removed**: Current Role column
+- **Added**: PreQ Score column (was combined before)
+- **Simplified**: 5 columns instead of 7
+
+**Kept:**
+- Applicant Details Panel
+- Search functionality
+- Stats dashboard
+- Click-to-view behavior
 
 ---
 
-## 🧪 How to Test
-
-### 1. Test Companies Page
+## 📊 Complete User Flow (Client)
 
 ```
-1. Login as IT Admin or Internal Ops
-2. Navigate to /companies
-3. Click "+ Add Company"
-4. Fill form:
-   - Ref ID: TEST001
-   - Name: Test Company
-   - Industry: Technology & IT
-   - Upload a logo (test file validation)
-   - Fill contact person details
-5. Click "Create Company"
-6. Verify toast notification appears
-7. Verify company appears in table
-8. Click company name to edit
-9. Update details and save
-```
-
-### 2. Test Jobs Page
-
-```
-1. Navigate to /jobs
-2. Click "+ Create Job"
-3. Select company from dropdown
-4. Fill position title
-5. Select multiple employment basis (e.g., Full-Time + Hybrid)
-6. Select salary band
-7. Select categories
-8. Add 2-3 preset questions
-9. Fill description
-10. Set closing date
-11. Set status to "Open"
-12. Click "Create Job"
-13. Verify job appears in table
-```
-
-### 3. Test Applicants Page
-
-```
-1. Navigate to /applicants
-2. Verify stats cards show correct counts
-3. Use search to filter
-4. Click "Download CV" button
-5. Verify toast notification
-```
-
-### 4. Test User Management (Admin Only)
-
-```
-1. Login as IT Admin
-2. Navigate to /users
-3. Verify page loads
-4. Search for users
-5. View company memberships
-6. Logout and login as Internal Ops
-7. Try to navigate to /users
-8. Verify access blocked (sidebar doesn't show it)
+1. Login as Client
+   ↓
+2. Navigate to /company/{companyId}/jobs
+   ↓
+3. View jobs list
+   - Sort by date or closing date
+   - Click 3-dots menu
+   ↓
+4. Click "View Job Details"
+   → Job Details Modal opens
+   → View full job information
+   → Click "View Applicants" or Close
+   ↓
+5. Click "View Applicants" (from menu or modal)
+   → Navigate to applicants page
+   ↓
+6. View applicants table
+   - See Overall Score + PreQ Score
+   - See Recommendation
+   - Search applicants
+   ↓
+7. Click any applicant row
+   → Details panel slides in from right
+   → View full CV analysis
+   → Navigate between sections
+   → Close panel
 ```
 
 ---
 
-## ✅ Phase 6B Checklist
+## ✅ Phase 6C Checklist
 
 - [ ] Upload all files to GitHub
-- [ ] Commit and push
+- [ ] Commit and push changes
 - [ ] Wait for Koyeb deployment
-- [ ] Test Companies page (create, edit, logo upload)
-- [ ] Test Jobs page (create with all fields)
-- [ ] Test Applicants page (search, CV download)
-- [ ] Test User Management (admin only access)
-- [ ] Verify role-based access control works
-- [ ] Report: "Phase 6B deployed ✅" or share errors
+- [ ] Test as client user
+- [ ] Test jobs page sorting
+- [ ] Test 3-dots menu
+- [ ] Test Job Details modal
+- [ ] Test applicants page
+- [ ] Verify details panel still works
+- [ ] Test mobile responsiveness
+- [ ] Report: "Phase 6C deployed ✅"
+
+---
+
+## 🧪 Testing Guide
+
+### Test 1: Jobs Page Sorting
+
+```
+1. Login as client
+2. Go to jobs page
+3. Click "Date Posted" header
+   → Table re-sorts (newest first)
+4. Click "Date Posted" again
+   → Table re-sorts (oldest first)
+5. Click "Closing Date" header
+   → Table sorts by closing date
+```
+
+### Test 2: 3-Dots Menu
+
+```
+1. On jobs page
+2. Click 3-dots (⋮) on any job row
+3. Menu opens with 2 options
+4. Click "View Job Details"
+   → Modal opens with full info
+5. Close modal
+6. Click 3-dots again
+7. Click "View Applicants"
+   → Navigate to applicants page
+```
+
+### Test 3: Job Details Modal
+
+```
+1. Open Job Details modal
+2. Verify all sections display:
+   - Job ID, location, dates
+   - Employment basis badges
+   - Salary band
+   - Categories badges
+   - Description
+   - Company info
+   - Screening questions
+3. Click "View Applicants" button
+   → Navigate to applicants
+4. Click "Close" button
+   → Modal closes
+```
+
+### Test 4: Updated Applicants Table
+
+```
+1. Navigate to any job's applicants
+2. Verify 5 columns:
+   - Name + email
+   - Location
+   - Overall Score (color-coded)
+   - PreQ Score (color-coded)
+   - Recommendation badge
+3. Click any row
+   → Details panel slides in
+4. Verify panel navigation works
+5. Close panel
+6. Test search functionality
+```
 
 ---
 
 ## 🆘 Troubleshooting
 
-**"Page not found" errors:**
-- Ensure all files are in correct directories
-- Check AppShell is rendering pages
-- Verify routes are accessible for your role
+**Sorting not working:**
+- Check console for errors
+- Verify date fields are valid
+- Test with different data
+
+**3-dots menu not appearing:**
+- Verify DropdownMenu component imported
+- Check browser console
+- Test click on different rows
 
 **Modal not opening:**
-- Check browser console for errors
-- Verify Dialog component imported correctly
-- Test with simple button click
+- Check state management
+- Verify Dialog component
+- Look for JavaScript errors
 
-**Logo upload not working:**
-- File validation requires image/* types
-- Max size is 5MB
-- Preview uses FileReader API
+**Details panel missing:**
+- Ensure Phase 5 ApplicantDetailsPanel component exists
+- Check import path
+- Verify component in correct location
 
-**Access denied to pages:**
-- Check user role in session
-- Verify canAccessRoute() logic in auth-context
-- IT Admin has full access
-- Internal Ops has Companies/Jobs/Applicants
-- Client has none of these pages
+**Column not showing:**
+- Check table headers match table cells
+- Verify data structure
+- Look for typos in field names
 
 ---
 
-## 🎯 What's Next: Phase 6C
+## 🎯 Backend Integration Notes
 
-After Phase 6B is deployed and tested:
+### Jobs Sorting
 
-**Phase 6C: Client Experience** will add:
+Backend should support:
+```
+GET /companies/:companyId/jobs?sort=date_posted&order=desc
+GET /companies/:companyId/jobs?sort=closing_date&order=asc
+```
+
+### Job Details
+
+Use existing endpoint:
+```
+GET /companies/:companyId/jobs/:jobId
+```
+
+Returns full job object with all fields.
+
+### Applicants
+
+Use existing endpoint:
+```
+GET /companies/:companyId/jobs/:jobId/applicants
+```
+
+Ensure response includes:
+- `overall_match_score`
+- `preset_questions_score`
+- `final_recommendation`
+- All fields needed for details panel
+
+---
+
+## 📱 Mobile Responsiveness
+
+### Jobs Page
+- Table scrolls horizontally on mobile
+- 3-dots menu still accessible
+- Modal is full-screen on mobile
+
+### Applicants Page
+- Table responsive
+- Details panel full-screen on mobile
+- Stats cards stack vertically
+
+---
+
+## 🎉 Phase 6 Complete!
+
+With Phase 6C deployed, you now have:
+
+**Phase 6A** ✅
+- App Shell with sidebar navigation
+- Role-based access control
+- Company switcher
+- Auth system
+
+**Phase 6B** ✅
+- Companies Management
+- Global Jobs page
+- Global Applicants page
+- User Management
+
+**Phase 6C** ✅
 - Enhanced client jobs page
-- 3-dots actions menu on job rows
-- Job Details modal (view full job info)
-- Updated applicants table with new columns
-- Polish and final tweaks
+- Job Details modal
+- Updated applicants page
+- Complete client experience
+
+---
+
+## 🚀 Production Ready
+
+The frontend is now **feature-complete** and ready for:
+1. Backend API integration
+2. Production deployment
+3. User acceptance testing
+4. Real-world usage
 
 ---
 
 ## 📞 Support
 
 After deployment, report status:
-- **Success**: "Phase 6B deployed ✅ - All pages working!"
-- **Issues**: Share error messages or screenshots
+- **Success**: "Phase 6C deployed ✅ - All features working!"
+- **Issues**: Share screenshots or error messages
 
 ---
 
-## 💡 Implementation Notes
+## 💡 Future Enhancements (Optional)
 
-### Logo Upload
-Currently stores base64 preview. In production:
-```typescript
-const formData = new FormData()
-formData.append('logo_file', logoFile)
-const response = await apiClient.post(
-  `/companies/${companyId}/logo`, 
-  formData,
-  { headers: { 'Content-Type': 'multipart/form-data' } }
-)
-// response.data.logo_url
-```
+These features were mentioned in the spec but are nice-to-have:
 
-### Multi-Select Basis
-Stores as array: `["Full-Time", "Hybrid"]`
-
-Backend should expect:
-```json
-{
-  "basis": ["Full-Time", "Hybrid"]
-}
-```
-
-### Preset Questions
-Stores as array, max 3, empty strings filtered out:
-```json
-{
-  "preset_questions": [
-    "What's your experience with React?",
-    "Can you work remotely?"
-  ]
-}
-```
-
-### CV Download
-Currently simulated. In production:
-```typescript
-const response = await apiClient.get(
-  `/companies/${companyId}/applicants/${applicantId}/cv/download`,
-  { responseType: 'blob' }
-)
-const url = window.URL.createObjectURL(response.data)
-const link = document.createElement('a')
-link.href = url
-link.download = `${applicantName}-CV.pdf`
-link.click()
-```
+- **Search Columns** - Show/hide table columns
+- **Enhanced Pagination** - "Showing 1-10 of 1000" style
+- **Column Sort Indicators** - More visual sort arrows
+- **Bulk Actions** - Select multiple applicants
+- **Export to CSV** - Download applicants data
+- **Activity Logs** - Track who viewed what
+- **Job Templates** - Reuse job descriptions
 
 ---
 
-**Phase 6B Ready to Deploy!** 🚀
+**🎊 Congratulations! Phase 6C Complete - Project Finished! 🎊**
