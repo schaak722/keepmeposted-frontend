@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -9,6 +9,7 @@ import { TableSkeleton } from "@/components/ui/skeleton"
 import type { Applicant, Recommendation } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
+import { useAuth } from "@/contexts/auth-context"
 
 // Mock data
 const MOCK_APPLICANTS: Applicant[] = [
@@ -64,10 +65,18 @@ const MOCK_APPLICANTS: Applicant[] = [
 ]
 
 export default function ApplicantsPage() {
+  const { activeCompanyId, activeCompany } = useAuth()
+
   const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
+
+
+const scopedApplicants = useMemo(() => {
+  if (!activeCompanyId) return []
+  return scopedApplicants.filter((a) => a.company_id === activeCompanyId)
+}, [activeCompanyId])
 
   const filteredApplicants = applicants.filter(applicant => 
     applicant.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
