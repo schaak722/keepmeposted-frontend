@@ -21,7 +21,13 @@ export function JobDetailsModal({ job, isOpen, onClose, onViewApplicants }: JobD
   const categories = JOB_CATEGORIES.filter(c => job.category_ids.includes(c.id))
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        // Only close when the dialog requests to close (esc/backdrop).
+        if (!open) onClose()
+      }}
+    >
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">{job.position_title}</DialogTitle>
